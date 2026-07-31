@@ -33,6 +33,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
     <Reference Include="RagePluginHook">
       <HintPath>..\..\lib\RagePluginHookSDK.dll</HintPath>
       <Private>False</Private>
@@ -42,6 +43,9 @@
     <Compile Include="EntryPoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Debug\DebugCommands.cs" />
+    <Compile Include="Config\ConfigLoader.cs" />
+    <Compile Include="Config\ConfigValidator.cs" />
+    <Compile Include="Config\Schema\GeneralConfig.cs" />
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\ModPaths.cs" />
     <Compile Include="Utils\Safe.cs" />

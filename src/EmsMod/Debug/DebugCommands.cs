@@ -1,5 +1,6 @@
 using System;
 using Rage.Attributes;
+using EmsMod.Config;
 using EmsMod.Utils;
 
 namespace EmsMod.Debug
@@ -24,6 +25,17 @@ namespace EmsMod.Debug
         {
             Safe.Run(() => throw new InvalidOperationException("This is a deliberate test exception."), "DebugCommands.TestSafe");
             Log.Info("Safe.Run returned control normally after the deliberate exception above.");
+        }
+
+        [ConsoleCommand("emsmod_reloadconfig", Description = "Reloads General.xml from disk and logs the resulting values.")]
+        public static void ReloadConfig()
+        {
+            ConfigLoader.ReloadGeneral();
+            var general = ConfigLoader.General;
+            Log.Info($"General config: VoiceEngine={general.VoiceEngine}, " +
+                     $"AcceptDeclineTimeoutSeconds={general.AcceptDeclineTimeoutSeconds}, " +
+                     $"WalkedAwayDistanceMeters={general.WalkedAwayDistanceMeters}, " +
+                     $"DebugLoggingEnabled={general.DebugLoggingEnabled}");
         }
     }
 }
