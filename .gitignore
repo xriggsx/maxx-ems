@@ -1,0 +1,8 @@
+# Build intermediates
+[Bb]in/
+[Oo]bj/
+*.user
+.vs/
+
+# Runtime-generated logs (not build output — created by the plugin at runtime)
+dist/Plugins/EmsMod/Logs/
