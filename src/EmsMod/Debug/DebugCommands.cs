@@ -1,6 +1,8 @@
 using System;
+using Rage;
 using Rage.Attributes;
 using EmsMod.Config;
+using EmsMod.Core;
 using EmsMod.Utils;
 
 namespace EmsMod.Debug
@@ -36,6 +38,31 @@ namespace EmsMod.Debug
                      $"AcceptDeclineTimeoutSeconds={general.AcceptDeclineTimeoutSeconds}, " +
                      $"WalkedAwayDistanceMeters={general.WalkedAwayDistanceMeters}, " +
                      $"DebugLoggingEnabled={general.DebugLoggingEnabled}");
+        }
+
+        [ConsoleCommand("emsmod_test_spawn", Description = "Spawns one test ped near the player, registered under owner 'TestSpawn'.")]
+        public static void TestSpawn()
+        {
+            Safe.Run(() =>
+            {
+                Vector3 position = Game.LocalPlayer.Character.Position + new Vector3(2f, 0f, 0f);
+                var ped = new Ped(position);
+                EntitySpawnRegistry.RegisterEntity("TestSpawn", ped);
+                Log.Info($"TestSpawn: spawned a ped. Pending count for 'TestSpawn' is now {EntitySpawnRegistry.GetPendingCount("TestSpawn")}.");
+            }, "DebugCommands.TestSpawn");
+        }
+
+        [ConsoleCommand("emsmod_test_cleanup", Description = "Cleans up everything registered under owner 'TestSpawn'.")]
+        public static void TestCleanup()
+        {
+            EntitySpawnRegistry.CleanupOwner("TestSpawn");
+            Log.Info($"TestCleanup: pending count for 'TestSpawn' is now {EntitySpawnRegistry.GetPendingCount("TestSpawn")}.");
+        }
+
+        [ConsoleCommand("emsmod_debug_countspawned", Description = "Logs the total pending cleanup count across all owners in EntitySpawnRegistry.")]
+        public static void CountSpawned()
+        {
+            Log.Info($"EntitySpawnRegistry total pending count: {EntitySpawnRegistry.GetTotalPendingCount()}.");
         }
     }
 }

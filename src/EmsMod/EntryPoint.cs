@@ -1,5 +1,6 @@
 using System;
 using Rage;
+using EmsMod.Core;
 using EmsMod.Utils;
 
 [assembly: Rage.Attributes.Plugin("EmsMod", Description = "Kid-friendly EMS roleplay mod", Author = "MaxxEms")]
@@ -13,16 +14,26 @@ namespace EmsMod
             Game.AddConsoleCommands();
             Log.Info("Plugin loaded successfully.");
 
-            while (true)
+            try
             {
-                try
+                while (true)
                 {
-                    GameFiber.Yield();
+                    try
+                    {
+                        GameFiber.Yield();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "EntryPoint.Main tick");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "EntryPoint.Main tick");
-                }
+            }
+            finally
+            {
+                // Runs on plugin unload/hot-reload (RPH aborts this fiber, which
+                // unwinds as a ThreadAbortException) so nothing spawned by this
+                // mod is ever left behind in the world.
+                EntitySpawnRegistry.CleanupAll();
             }
         }
     }
