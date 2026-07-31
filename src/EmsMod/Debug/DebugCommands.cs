@@ -3,6 +3,7 @@ using Rage;
 using Rage.Attributes;
 using EmsMod.Config;
 using EmsMod.Core;
+using EmsMod.Input;
 using EmsMod.Utils;
 
 namespace EmsMod.Debug
@@ -14,6 +15,8 @@ namespace EmsMod.Debug
     /// </summary>
     public static class DebugCommands
     {
+        private static GameFiber _inputTestFiber;
+
         [ConsoleCommand("emsmod_test_log", Description = "Logs one line at each level to verify Log works.")]
         public static void TestLog()
         {
@@ -63,6 +66,46 @@ namespace EmsMod.Debug
         public static void CountSpawned()
         {
             Log.Info($"EntitySpawnRegistry total pending count: {EntitySpawnRegistry.GetTotalPendingCount()}.");
+        }
+
+        [ConsoleCommand("emsmod_test_input_start", Description = "Starts a background loop that logs whenever any InputAction is pressed, keyboard or controller.")]
+        public static void TestInputStart()
+        {
+            if (_inputTestFiber != null && _inputTestFiber.IsAlive)
+            {
+                Log.Info("TestInputStart: already running.");
+                return;
+            }
+
+            _inputTestFiber = GameFiber.StartNew(() =>
+            {
+                Log.Info("TestInputStart: input test loop running. Press any bound key/button.");
+                while (true)
+                {
+                    foreach (InputAction action in Enum.GetValues(typeof(InputAction)))
+                    {
+                        if (InputManager.IsActionPressed(action))
+                        {
+                            Log.Info($"TestInput: '{action}' pressed.");
+                        }
+                    }
+                    GameFiber.Yield();
+                }
+            }, "EmsMod-InputTest");
+        }
+
+        [ConsoleCommand("emsmod_test_input_stop", Description = "Stops the background loop started by emsmod_test_input_start.")]
+        public static void TestInputStop()
+        {
+            if (_inputTestFiber != null && _inputTestFiber.IsAlive)
+            {
+                _inputTestFiber.Abort();
+                Log.Info("TestInputStop: input test loop stopped.");
+            }
+            else
+            {
+                Log.Info("TestInputStop: no input test loop was running.");
+            }
         }
     }
 }
