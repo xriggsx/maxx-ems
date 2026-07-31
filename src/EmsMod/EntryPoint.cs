@@ -1,6 +1,7 @@
 using System;
 using Rage;
 using EmsMod.Core;
+using EmsMod.UI;
 using EmsMod.Utils;
 
 [assembly: Rage.Attributes.Plugin("EmsMod", Description = "Kid-friendly EMS roleplay mod", Author = "MaxxEms")]
@@ -12,6 +13,7 @@ namespace EmsMod
         public static void Main()
         {
             Game.AddConsoleCommands();
+            PromptUI.Initialize();
             Log.Info("Plugin loaded successfully.");
 
             try

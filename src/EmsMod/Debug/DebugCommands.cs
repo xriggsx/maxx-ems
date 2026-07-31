@@ -4,6 +4,7 @@ using Rage.Attributes;
 using EmsMod.Config;
 using EmsMod.Core;
 using EmsMod.Input;
+using EmsMod.UI;
 using EmsMod.Utils;
 
 namespace EmsMod.Debug
@@ -16,6 +17,7 @@ namespace EmsMod.Debug
     public static class DebugCommands
     {
         private static GameFiber _inputTestFiber;
+        private static GameFiber _promptTestFiber;
 
         [ConsoleCommand("emsmod_test_log", Description = "Logs one line at each level to verify Log works.")]
         public static void TestLog()
@@ -106,6 +108,50 @@ namespace EmsMod.Debug
             {
                 Log.Info("TestInputStop: no input test loop was running.");
             }
+        }
+
+        [ConsoleCommand("emsmod_test_prompt", Description = "Shows the accept/decline popup with a 15s pause-aware timeout; logs Accepted/Declined/TimedOut.")]
+        public static void TestPrompt()
+        {
+            if (_promptTestFiber != null && _promptTestFiber.IsAlive)
+            {
+                Log.Info("TestPrompt: already running.");
+                return;
+            }
+
+            _promptTestFiber = GameFiber.StartNew(() =>
+            {
+                PromptUI.Show("Test Callout: Car accident on Vinewood Blvd.");
+
+                float elapsed = 0f;
+                const float timeoutSeconds = 15f;
+                string result = "TimedOut";
+
+                while (elapsed < timeoutSeconds)
+                {
+                    if (!Game.IsPaused)
+                    {
+                        elapsed += Game.FrameTime;
+                    }
+
+                    if (InputManager.IsActionPressed(InputAction.AcceptCallout))
+                    {
+                        result = "Accepted";
+                        break;
+                    }
+
+                    if (InputManager.IsActionPressed(InputAction.DeclineCallout))
+                    {
+                        result = "Declined";
+                        break;
+                    }
+
+                    GameFiber.Yield();
+                }
+
+                PromptUI.Hide();
+                Log.Info($"TestPrompt: result = {result}.");
+            }, "EmsMod-PromptTest");
         }
     }
 }
