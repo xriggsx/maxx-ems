@@ -1,4 +1,6 @@
+using System;
 using Rage;
+using EmsMod.Utils;
 
 [assembly: Rage.Attributes.Plugin("EmsMod", Description = "Kid-friendly EMS roleplay mod", Author = "MaxxEms")]
 
@@ -8,11 +10,19 @@ namespace EmsMod
     {
         public static void Main()
         {
-            Game.LogTrivial("EmsMod: Plugin loaded successfully.");
+            Game.AddConsoleCommands();
+            Log.Info("Plugin loaded successfully.");
 
             while (true)
             {
-                GameFiber.Yield();
+                try
+                {
+                    GameFiber.Yield();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "EntryPoint.Main tick");
+                }
             }
         }
     }
