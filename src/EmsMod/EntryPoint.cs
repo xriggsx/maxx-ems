@@ -1,5 +1,6 @@
 using System;
 using Rage;
+using EmsMod.Callouts;
 using EmsMod.Core;
 using EmsMod.Dialogue;
 using EmsMod.UI;
@@ -25,6 +26,7 @@ namespace EmsMod
                     try
                     {
                         DialogueEngine.Tick();
+                        CalloutManager.Tick();
                         GameFiber.Yield();
                     }
                     catch (Exception ex)

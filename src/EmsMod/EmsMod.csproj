@@ -54,6 +54,10 @@
     <Compile Include="Dialogue\DialogueEngine.cs" />
     <Compile Include="Dialogue\IDispatchVoice.cs" />
     <Compile Include="Dialogue\SystemSpeechVoice.cs" />
+    <Compile Include="Callouts\CalloutBase.cs" />
+    <Compile Include="Callouts\CalloutManager.cs" />
+    <Compile Include="Callouts\CalloutState.cs" />
+    <Compile Include="Callouts\TestCallout.cs" />
     <Compile Include="Config\ConfigLoader.cs" />
     <Compile Include="Config\ConfigValidator.cs" />
     <Compile Include="Config\Schema\GeneralConfig.cs" />

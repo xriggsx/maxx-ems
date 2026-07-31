@@ -1,6 +1,7 @@
 using System;
 using Rage;
 using Rage.Attributes;
+using EmsMod.Callouts;
 using EmsMod.Config;
 using EmsMod.Core;
 using EmsMod.Dialogue;
@@ -162,6 +163,15 @@ namespace EmsMod.Debug
             DialogueEngine.Speak(
                 "Dispatch to all units, this is a test dispatch line.",
                 () => Log.Info("TestVoice: completion callback fired."));
+        }
+
+        [ConsoleCommand("emsmod_test_callout_start", Description = "Dispatches the content-free TestCallout to exercise the full CalloutBase pattern in-game.")]
+        public static void TestCalloutStart()
+        {
+            bool dispatched = CalloutManager.Dispatch(new TestCallout());
+            Log.Info(dispatched
+                ? "TestCalloutStart: dispatched. Accept/decline the popup, then walk up and press the interact key/button to resolve."
+                : "TestCalloutStart: a callout is already active.");
         }
     }
 }
