@@ -1,6 +1,7 @@
 using System;
 using Rage;
 using EmsMod.Core;
+using EmsMod.Dialogue;
 using EmsMod.UI;
 using EmsMod.Utils;
 
@@ -14,6 +15,7 @@ namespace EmsMod
         {
             Game.AddConsoleCommands();
             PromptUI.Initialize();
+            DialogueEngine.Initialize();
             Log.Info("Plugin loaded successfully.");
 
             try
@@ -22,6 +24,7 @@ namespace EmsMod
                 {
                     try
                     {
+                        DialogueEngine.Tick();
                         GameFiber.Yield();
                     }
                     catch (Exception ex)

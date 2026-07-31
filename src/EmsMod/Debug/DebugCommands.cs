@@ -3,6 +3,7 @@ using Rage;
 using Rage.Attributes;
 using EmsMod.Config;
 using EmsMod.Core;
+using EmsMod.Dialogue;
 using EmsMod.Input;
 using EmsMod.UI;
 using EmsMod.Utils;
@@ -152,6 +153,15 @@ namespace EmsMod.Debug
                 PromptUI.Hide();
                 Log.Info($"TestPrompt: result = {result}.");
             }, "EmsMod-PromptTest");
+        }
+
+        [ConsoleCommand("emsmod_test_voice", Description = "Speaks one test dispatch line and logs when the completion callback fires.")]
+        public static void TestVoice()
+        {
+            Log.Info("TestVoice: speaking now.");
+            DialogueEngine.Speak(
+                "Dispatch to all units, this is a test dispatch line.",
+                () => Log.Info("TestVoice: completion callback fired."));
         }
     }
 }
