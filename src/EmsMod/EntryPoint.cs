@@ -14,6 +14,15 @@ namespace EmsMod
     {
         public static void Main()
         {
+            // Last-resort net: catches anything that slips past every other
+            // Safe.Run/try-catch, including exceptions on background
+            // GameFibers and console-command handlers, which don't run
+            // inside the main loop's own try-catch below.
+            AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+            {
+                Log.Error($"UNHANDLED EXCEPTION (IsTerminating={e.IsTerminating}): {e.ExceptionObject}");
+            };
+
             Game.AddConsoleCommands();
             PromptUI.Initialize();
             DialogueEngine.Initialize();
