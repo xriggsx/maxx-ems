@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Rage;
 using EmsMod.Callouts;
 using EmsMod.Core;
@@ -13,8 +14,25 @@ namespace EmsMod
 {
     public static class EntryPoint
     {
+        private static int _hasRun;
+
         public static void Main()
         {
+            // Guard against Main() somehow being invoked more than once in
+            // the same AppDomain (e.g. RPH retrying a slow/stalled initial
+            // load) - without this, a second invocation would re-register
+            // every console command and conflict with the first invocation's
+            // still-active registrations, which is exactly the intermittent
+            // "already defined, renamed to X2" behavior seen in testing with
+            // no duplicate DLL or process involved. Interlocked rather than a
+            // plain bool in case two invocations start close enough together
+            // to race on the check.
+            if (Interlocked.CompareExchange(ref _hasRun, 1, 0) != 0)
+            {
+                Log.Warn("EntryPoint.Main invoked again in the same AppDomain - ignoring the second invocation.");
+                return;
+            }
+
             // Last-resort net: catches anything that slips past every other
             // Safe.Run/try-catch, including exceptions on background
             // GameFibers and console-command handlers, which don't run
