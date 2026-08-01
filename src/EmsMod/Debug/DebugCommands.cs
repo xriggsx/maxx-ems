@@ -24,7 +24,7 @@ namespace EmsMod.Debug
         private static GameFiber _inputTestFiber;
         private static GameFiber _promptTestFiber;
 
-        [ConsoleCommand("emsmod_test_log", Description = "Logs one line at each level to verify Log works.")]
+        [ConsoleCommand(Name = "emsmod_test_log", Description = "Logs one line at each level to verify Log works.")]
         public static void TestLog()
         {
             Safe.Run(() =>
@@ -35,14 +35,14 @@ namespace EmsMod.Debug
             }, "DebugCommands.TestLog");
         }
 
-        [ConsoleCommand("emsmod_test_safe", Description = "Deliberately throws inside Safe.Run to verify it's caught and logged without crashing the plugin.")]
+        [ConsoleCommand(Name = "emsmod_test_safe", Description = "Deliberately throws inside Safe.Run to verify it's caught and logged without crashing the plugin.")]
         public static void TestSafe()
         {
             Safe.Run(() => throw new InvalidOperationException("This is a deliberate test exception."), "DebugCommands.TestSafe");
             Log.Info("Safe.Run returned control normally after the deliberate exception above.");
         }
 
-        [ConsoleCommand("emsmod_reloadconfig", Description = "Reloads General.xml from disk and logs the resulting values.")]
+        [ConsoleCommand(Name = "emsmod_reloadconfig", Description = "Reloads General.xml from disk and logs the resulting values.")]
         public static void ReloadConfig()
         {
             Safe.Run(() =>
@@ -56,7 +56,7 @@ namespace EmsMod.Debug
             }, "DebugCommands.ReloadConfig");
         }
 
-        [ConsoleCommand("emsmod_test_spawn", Description = "Spawns one test ped near the player, registered under owner 'TestSpawn'.")]
+        [ConsoleCommand(Name = "emsmod_test_spawn", Description = "Spawns one test ped near the player, registered under owner 'TestSpawn'.")]
         public static void TestSpawn()
         {
             Safe.Run(() =>
@@ -68,7 +68,7 @@ namespace EmsMod.Debug
             }, "DebugCommands.TestSpawn");
         }
 
-        [ConsoleCommand("emsmod_test_cleanup", Description = "Cleans up everything registered under owner 'TestSpawn'.")]
+        [ConsoleCommand(Name = "emsmod_test_cleanup", Description = "Cleans up everything registered under owner 'TestSpawn'.")]
         public static void TestCleanup()
         {
             Safe.Run(() =>
@@ -78,7 +78,7 @@ namespace EmsMod.Debug
             }, "DebugCommands.TestCleanup");
         }
 
-        [ConsoleCommand("emsmod_debug_countspawned", Description = "Logs the total pending cleanup count across all owners in EntitySpawnRegistry.")]
+        [ConsoleCommand(Name = "emsmod_debug_countspawned", Description = "Logs the total pending cleanup count across all owners in EntitySpawnRegistry.")]
         public static void CountSpawned()
         {
             Safe.Run(() =>
@@ -87,7 +87,7 @@ namespace EmsMod.Debug
             }, "DebugCommands.CountSpawned");
         }
 
-        [ConsoleCommand("emsmod_test_input_start", Description = "Starts a background loop that logs whenever any InputAction is pressed, keyboard or controller.")]
+        [ConsoleCommand(Name = "emsmod_test_input_start", Description = "Starts a background loop that logs whenever any InputAction is pressed, keyboard or controller.")]
         public static void TestInputStart()
         {
             Safe.Run(() =>
@@ -119,7 +119,7 @@ namespace EmsMod.Debug
             }, "DebugCommands.TestInputStart");
         }
 
-        [ConsoleCommand("emsmod_test_input_stop", Description = "Stops the background loop started by emsmod_test_input_start.")]
+        [ConsoleCommand(Name = "emsmod_test_input_stop", Description = "Stops the background loop started by emsmod_test_input_start.")]
         public static void TestInputStop()
         {
             Safe.Run(() =>
@@ -136,7 +136,7 @@ namespace EmsMod.Debug
             }, "DebugCommands.TestInputStop");
         }
 
-        [ConsoleCommand("emsmod_test_prompt", Description = "Shows the accept/decline popup with a 15s pause-aware timeout; logs Accepted/Declined/TimedOut.")]
+        [ConsoleCommand(Name = "emsmod_test_prompt", Description = "Shows the accept/decline popup with a 15s pause-aware timeout; logs Accepted/Declined/TimedOut.")]
         public static void TestPrompt()
         {
             Safe.Run(() =>
@@ -186,7 +186,7 @@ namespace EmsMod.Debug
             }, "DebugCommands.TestPrompt");
         }
 
-        [ConsoleCommand("emsmod_test_voice", Description = "Speaks one test dispatch line and logs when the completion callback fires.")]
+        [ConsoleCommand(Name = "emsmod_test_voice", Description = "Speaks one test dispatch line and logs when the completion callback fires.")]
         public static void TestVoice()
         {
             Safe.Run(() =>
@@ -198,7 +198,7 @@ namespace EmsMod.Debug
             }, "DebugCommands.TestVoice");
         }
 
-        [ConsoleCommand("emsmod_test_callout_start", Description = "Dispatches the content-free TestCallout to exercise the full CalloutBase pattern in-game.")]
+        [ConsoleCommand(Name = "emsmod_test_callout_start", Description = "Dispatches the content-free TestCallout to exercise the full CalloutBase pattern in-game.")]
         public static void TestCalloutStart()
         {
             Safe.Run(() =>
