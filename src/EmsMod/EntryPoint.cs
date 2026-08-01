@@ -2,6 +2,7 @@ using System;
 using Rage;
 using EmsMod.Callouts;
 using EmsMod.Core;
+using EmsMod.Debug;
 using EmsMod.Dialogue;
 using EmsMod.UI;
 using EmsMod.Utils;
@@ -23,7 +24,13 @@ namespace EmsMod
                 Log.Error($"UNHANDLED EXCEPTION (IsTerminating={e.IsTerminating}): {e.ExceptionObject}");
             };
 
-            Game.AddConsoleCommands();
+            // Explicit Type[] overload rather than the parameterless one -
+            // RPH loads plugins into their own AppDomain via remoting, and
+            // the parameterless overload's "calling assembly" reflection
+            // resolved to the wrong assembly across that boundary, so
+            // console commands never registered (RPH reported them as
+            // unknown commands even though the plugin itself loaded fine).
+            Game.AddConsoleCommands(new[] { typeof(DebugCommands) });
             PromptUI.Initialize();
             DialogueEngine.Initialize();
             Log.Info("Plugin loaded successfully.");
