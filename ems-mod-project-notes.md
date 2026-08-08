@@ -101,7 +101,11 @@ gaming-PC setup and current-state handover. Summary of phases:
 3. `CalloutBase`/`CalloutManager` skeleton + trivial `TestCallout` vertical
    slice — proves the whole pattern (watchdogs, cleanup, state machine)
    before any real content. — **done**
-4. First real callout: `CarAccident_Bleeding`. — **next up**
+4. First real callout: `CarAccident_Bleeding`. — **done** (verified in-game
+   2026-08-08: dispatch popup + TTS, drive-to blip, on-foot arrival, patient +
+   scene car spawn, single-tap "help" + short bandage beat, config-driven
+   transport roll, positive resolution either way, full cleanup).
 5. Second/third callouts as thin subclasses — audit point for shared logic.
+   — **next up**
 6. Remaining roster + "Call Police" + NAudio voice swap, expanding
    incrementally from proven infra.

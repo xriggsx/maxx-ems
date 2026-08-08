@@ -209,5 +209,17 @@ namespace EmsMod.Debug
                     : "TestCalloutStart: a callout is already active.");
             }, "DebugCommands.TestCalloutStart");
         }
+
+        [ConsoleCommand(Name = "emsmod_callout_caraccident", Description = "Dispatches the CarAccident_Bleeding callout (Phase 4 first real callout).")]
+        public static void CalloutCarAccident()
+        {
+            Safe.Run(() =>
+            {
+                bool dispatched = CalloutManager.Dispatch(new CarAccident_Bleeding());
+                Log.Info(dispatched
+                    ? "CalloutCarAccident: dispatched. Accept the popup, drive to the yellow blip, get out and walk up, then press E/X to help the patient."
+                    : "CalloutCarAccident: a callout is already active.");
+            }, "DebugCommands.CalloutCarAccident");
+        }
     }
 }

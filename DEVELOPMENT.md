@@ -88,9 +88,19 @@ came from RPH's own scan, not a second `Main()` call. The guard is harmless and
 was left in place as a cheap safety net.) A stale old-build `EmsMod.dll` was also
 overwritten with the fresh build during this fix.
 
-**Next up (Phase 4):** first real callout, `CarAccident_Bleeding` — real config
-XML, dialogue, assessment options, and the transport-percentage resolution logic,
-built entirely on the now-proven CalloutBase infra.
+**Phase 4 done (verified in-game 2026-08-08):** first real callout,
+`CarAccident_Bleeding` — dispatch popup + TTS, drive-to map blip, on-foot arrival,
+patient + scene car spawn, single-tap "help" (short pause-safe bandage beat),
+config-driven transport roll (`TransportPercentage`), positive resolution either
+way, full cleanup. All text/timers/percentages live in
+`Config/Callouts/CarAccident_Bleeding.xml` (hot-reloadable via `emsmod_reloadconfig`
+after adding a per-callout reload, or a relaunch). Started via the temporary
+`emsmod_callout_caraccident` console command. Known simplifications to polish
+later: patient currently just stands (no injured animation yet); scene car is a
+plain `asea`; patient/car headings are unset (face default).
+
+**Next up (Phase 5):** a second/third callout as thin subclasses + config only —
+the audit point for "no duplicated logic" before expanding to the full roster.
 
 ## 6. Console commands (all temporary debug/smoke-test commands)
 

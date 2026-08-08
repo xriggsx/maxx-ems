@@ -58,9 +58,11 @@
     <Compile Include="Callouts\CalloutManager.cs" />
     <Compile Include="Callouts\CalloutState.cs" />
     <Compile Include="Callouts\TestCallout.cs" />
+    <Compile Include="Callouts\CarAccident\CarAccident_Bleeding.cs" />
     <Compile Include="Config\ConfigLoader.cs" />
     <Compile Include="Config\ConfigValidator.cs" />
     <Compile Include="Config\Schema\GeneralConfig.cs" />
+    <Compile Include="Config\Schema\CalloutConfig.cs" />
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\ModPaths.cs" />
     <Compile Include="Utils\Safe.cs" />

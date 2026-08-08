@@ -38,5 +38,33 @@ namespace EmsMod.Config
                 return (GeneralConfig)serializer.Deserialize(stream);
             }
         }
+
+        /// <summary>
+        /// Loads a per-callout config from Config/Callouts/&lt;fileName&gt;. Same two
+        /// defense layers as General: Safe.Run around deserialization (broken XML
+        /// -> null -> all-default config), then ConfigValidator backfills any
+        /// missing/out-of-range field. Never throws; always returns a usable config.
+        /// </summary>
+        public static CalloutConfig LoadCallout(string fileName)
+        {
+            string path = Path.Combine(ModPaths.ConfigDirectory, "Callouts", fileName);
+            CalloutConfig loaded = Safe.Run(() => DeserializeCallout(path), null, $"ConfigLoader.LoadCallout({fileName})");
+            return ConfigValidator.ValidateCallout(loaded, fileName);
+        }
+
+        private static CalloutConfig DeserializeCallout(string path)
+        {
+            if (!File.Exists(path))
+            {
+                Log.Warn($"ConfigLoader: callout config not found at '{path}', falling back to defaults.");
+                return null;
+            }
+
+            using (FileStream stream = File.OpenRead(path))
+            {
+                var serializer = new XmlSerializer(typeof(CalloutConfig));
+                return (CalloutConfig)serializer.Deserialize(stream);
+            }
+        }
     }
 }

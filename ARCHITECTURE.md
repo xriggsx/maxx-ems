@@ -1,7 +1,7 @@
 # EMS Roleplay Mod — Architecture & Build Plan
 
 > **Status (2026-08-08):** This is the original architecture blueprint the project
-> was built from. **Phases 0–3 are complete** (see `DEVELOPMENT.md` for current
+> was built from. **Phases 0–4 are complete** (see `DEVELOPMENT.md` for current
 > state and what's next). The design below is still the source of truth for *how*
 > the systems fit together, but a few implementation details ended up differing
 > from this plan — noted inline where relevant and summarized here:
@@ -196,9 +196,18 @@ interface IDispatchVoice { void Speak(string line, Action onComplete = null); bo
 2. **PromptUI + Dialogue/Voice skeleton.** ✅ done
 3. **CalloutBase/CalloutManager + trivial TestCallout vertical slice.** ✅ done
 4. **First real callout: `CarAccident_Bleeding`** — real config XML, dialogue,
-   assessment options, transport-percentage resolution. ← **next**
+   assessment interaction, transport-percentage resolution. ✅ done (verified
+   in-game 2026-08-08). Notable implementation choices: the assessment is a
+   **single-tap "help" action** (press Interact, short pause-safe bandage beat),
+   so no multi-option `AssessmentMenuUI` was needed yet — on-screen guidance
+   uses RPH's built-in `Game.DisplayHelp`/`DisplaySubtitle`/`DisplayNotification`
+   rather than custom-drawn UI. `CalloutBase` gained `OnDispatched`/`OnEnRoute`/
+   `IsArrivalComplete` hooks (EnRoute now holds until arrival) plus `SpawnVehicle`
+   and `CreateBlip` helpers. Arrival requires being **on foot** within
+   `ArrivalRadius` so the vehicle-entry watchdog doesn't instantly abandon on
+   arrival-by-car.
 5. **Second/third callout types** as thin subclasses + config only. Audit point for
-   "no duplicated logic."
+   "no duplicated logic." ← **next**
 6. **Polish** — NAudio voice swap, remaining roster, "Call Police" mechanic, tuning
    via config.
 

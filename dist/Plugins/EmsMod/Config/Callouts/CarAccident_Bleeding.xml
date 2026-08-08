@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalloutConfig>
+  <DispatchText>Car accident nearby. Someone has a small cut and needs a bandage.</DispatchText>
+  <DispatchVoiceLine>Dispatch to all units. Minor car accident nearby. A person has a small cut and needs help. Please respond.</DispatchVoiceLine>
+
+  <EnRouteHelpText>Drive to the yellow marker, then get out and walk up to the patient.</EnRouteHelpText>
+  <EnRouteVoiceLine>Responding to the scene.</EnRouteVoiceLine>
+
+  <OnSceneText>You're on scene. Check on the patient.</OnSceneText>
+  <OnSceneVoiceLine>On scene. Checking on the patient now.</OnSceneVoiceLine>
+
+  <AssessmentHelpText>Press E (or X on controller) to help the patient.</AssessmentHelpText>
+  <TreatingText>Putting on a bandage...</TreatingText>
+
+  <TreatedText>All better! The patient is treated and feeling good.</TreatedText>
+  <TransportedText>The patient is taken to the hospital for a checkup. Great job!</TransportedText>
+  <ResolutionVoiceLine>Nice work. The patient is going to be just fine.</ResolutionVoiceLine>
+
+  <TransportPercentage>40</TransportPercentage>
+  <SceneSpawnDistance>60</SceneSpawnDistance>
+  <ArrivalRadius>12</ArrivalRadius>
+  <TreatmentSeconds>4</TreatmentSeconds>
+  <SceneVehicleModel>asea</SceneVehicleModel>
+</CalloutConfig>

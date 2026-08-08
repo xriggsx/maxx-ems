@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using Rage;
 using EmsMod.Config;
 using EmsMod.Core;
@@ -39,6 +40,7 @@ namespace EmsMod.Callouts
         {
             SetState(CalloutState.Dispatched);
             SetState(CalloutState.AwaitingAcceptDecline);
+            Safe.Run(OnDispatched, $"CalloutBase.OnDispatched [{GetType().Name}]");
         }
 
         public void Tick()
@@ -57,8 +59,29 @@ namespace EmsMod.Callouts
             }, $"CalloutBase.TickCurrentState [{GetType().Name}]");
         }
 
+        /// <summary>Runs once when the callout is dispatched (popup shown).
+        /// Good place for a dispatch voice line / notification.</summary>
+        protected virtual void OnDispatched()
+        {
+        }
+
         protected virtual void OnAccepted()
         {
+        }
+
+        /// <summary>Runs once when the player accepts and the callout enters
+        /// EnRoute - set up the scene position, a map blip, GPS help text, etc.
+        /// here.</summary>
+        protected virtual void OnEnRoute()
+        {
+        }
+
+        /// <summary>Ticked every frame while EnRoute; the callout stays EnRoute
+        /// until this returns true, then advances to OnScene. Default is an
+        /// immediate arrival (matches the original pass-through behavior).</summary>
+        protected virtual bool IsArrivalComplete()
+        {
+            return true;
         }
 
         protected virtual void OnSceneArrived()
@@ -97,6 +120,42 @@ namespace EmsMod.Callouts
             return ped;
         }
 
+        /// <summary>Spawns a vehicle registered for automatic cleanup. Returns
+        /// null (logged) if the model fails to load, so a bad model name can
+        /// never abort the rest of the callout setup.</summary>
+        protected Vehicle SpawnVehicle(string model, Vector3 position, float heading = 0f)
+        {
+            return Safe.Run(() =>
+            {
+                var vehicle = new Vehicle(model, position, heading);
+                EntitySpawnRegistry.RegisterEntity(InstanceId, vehicle);
+                return vehicle;
+            }, null, $"CalloutBase.SpawnVehicle({model}) [{GetType().Name}]");
+        }
+
+        /// <summary>Creates a map blip registered for automatic cleanup. Blip
+        /// isn't an Entity, so it's tracked via a cleanup action instead.</summary>
+        protected Blip CreateBlip(Vector3 position, Color color, string name = null)
+        {
+            return Safe.Run(() =>
+            {
+                var blip = new Blip(position) { Color = color };
+                if (!string.IsNullOrEmpty(name))
+                {
+                    blip.Name = name;
+                }
+
+                EntitySpawnRegistry.RegisterCleanupAction(InstanceId, () =>
+                {
+                    if (blip != null && blip.IsValid())
+                    {
+                        blip.Delete();
+                    }
+                });
+                return blip;
+            }, null, $"CalloutBase.CreateBlip [{GetType().Name}]");
+        }
+
         protected static bool AdvanceTimer(ref float elapsedSeconds, float thresholdSeconds)
         {
             if (!Game.IsPaused)
@@ -128,10 +187,14 @@ namespace EmsMod.Callouts
                     break;
 
                 case CalloutState.EnRoute:
-                    // No travel/arrival tracking yet - a future callout that
-                    // needs one can hold this state until its own condition
-                    // is met instead of relying on this immediate pass-through.
-                    SetState(CalloutState.OnScene);
+                    // Hold EnRoute until the callout reports arrival. The base
+                    // default returns true immediately (original pass-through);
+                    // a callout with a scene to travel to overrides
+                    // IsArrivalComplete to hold here until the player arrives.
+                    if (IsArrivalComplete())
+                    {
+                        SetState(CalloutState.OnScene);
+                    }
                     break;
 
                 case CalloutState.Assessment:
@@ -172,6 +235,10 @@ namespace EmsMod.Callouts
                     break;
 
                 case CalloutState.EnRoute:
+                    PromptUI.Hide();
+                    Safe.Run(OnEnRoute, $"CalloutBase.OnEnRoute [{GetType().Name}]");
+                    break;
+
                 case CalloutState.Declined:
                 case CalloutState.Abandoned:
                     PromptUI.Hide();
