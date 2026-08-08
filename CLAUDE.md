@@ -39,16 +39,21 @@ punishment for wrong answers, no fail states.
 - **No progress persistence.** Patients-helped counts and any other progress reset
   every session — no save/load system needed.
 
-## Dev Environment (Two-PC Setup — Important)
-- **This machine (dev PC) has no GTA V and cannot run/test the game.** It is
-  code-only: write, build, compile. Never assume this machine can launch or test
-  in-game behavior directly.
-- **A separate gaming PC** has GTA V + full RPH install and is where actual in-game
-  testing happens.
-- **Sync method: Git** — commit/push from dev PC, pull on gaming PC to get the
-  latest build. Any workflow step involving "test in-game" means the user will do
-  this on the other machine and report back results/errors — don't expect an
-  immediate in-session test result the way a single-machine setup would allow.
+## Dev Environment (Transitioning to Single Gaming-PC Setup)
+- **Development is moving to the gaming PC** — the machine that has GTA V + full
+  RPH install + Visual Studio — so building and in-game testing happen on one
+  machine for a tight build → deploy → test loop. See `DEVELOPMENT.md` for the
+  gaming-PC setup/handover steps.
+- On the gaming PC, code can be built AND tested in-game there. The earlier setup
+  used a separate code-only dev PC (no GTA V) that built and pushed via Git for the
+  gaming PC to pull; that split still works but is no longer the primary flow.
+- Claude still cannot observe or interact with a running GTA V session on any
+  machine — in-game results (crashes, console output, behavior) always come from
+  the user reporting back or sharing screenshots/log files, regardless of which
+  machine hosts the code. "Test in-game" is always a user action, never something
+  Claude verifies directly.
+- **Sync method: Git** — branch is `main`; commit/push, then pull on whichever
+  machine is building.
 
 ## Tech Stack
 - **Dev PC:** Visual Studio Community 2022 (.NET desktop development workload),
