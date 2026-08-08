@@ -3,7 +3,6 @@ using System.Threading;
 using Rage;
 using EmsMod.Callouts;
 using EmsMod.Core;
-using EmsMod.Debug;
 using EmsMod.Dialogue;
 using EmsMod.UI;
 using EmsMod.Utils;
@@ -42,13 +41,16 @@ namespace EmsMod
                 Log.Error($"UNHANDLED EXCEPTION (IsTerminating={e.IsTerminating}): {e.ExceptionObject}");
             };
 
-            // Explicit Type[] overload rather than the parameterless one -
-            // RPH loads plugins into their own AppDomain via remoting, and
-            // the parameterless overload's "calling assembly" reflection
-            // resolved to the wrong assembly across that boundary, so
-            // console commands never registered (RPH reported them as
-            // unknown commands even though the plugin itself loaded fine).
-            Game.AddConsoleCommands(new[] { typeof(DebugCommands) });
+            // NOTE: We deliberately do NOT call Game.AddConsoleCommands here.
+            // RPH automatically scans a loaded plugin assembly and registers
+            // every [ConsoleCommand]-attributed method on its own. Calling
+            // AddConsoleCommands as well registered each command a SECOND time,
+            // which is what produced the wall of "console command conflict!
+            // ...already defined, renamed to <name>2" warnings on every launch.
+            // Relying solely on RPH's auto-registration means each command is
+            // defined exactly once, under its intended name. (The Main re-entry
+            // guard above could never have fixed this - the duplicate came from
+            // RPH's own scan, not a second Main() call.)
             PromptUI.Initialize();
             DialogueEngine.Initialize();
             Log.Info("Plugin loaded successfully.");

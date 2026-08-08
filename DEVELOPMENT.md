@@ -68,19 +68,25 @@ design rules live in `CLAUDE.md`; the callout roster and feature design live in
 - `CalloutBase`/`CalloutManager` state machine with three watchdogs
   (vehicle-entry, walked-away, pause-safe timers) + `TestCallout` vertical slice.
 
-**Verified in-game so far:** plugin loads; `emsmod_test_log` executes correctly.
+**Verified in-game (2026-08-08):** plugin loads cleanly (no warnings/errors);
+`emsmod_test_log` executes; `emsmod_test_callout_start` runs the full slice
+(accept/decline popup → keyboard/controller input → ped spawn → cleanup); TTS
+voice works. Phases 0–3 infra validated on real hardware.
 Fixed along the way: config path resolution under RPH's AppDomain shadow-copy
-(`ModPaths` now derives from the game exe path); console commands not registering
-(explicit `Type[]` overload of `AddConsoleCommands`); command names using method
+(`ModPaths` now derives from the game exe path); command names using method
 names instead of the attribute `Name` (now `Name = "..."` explicitly).
 
-**Open issue:** intermittent "console command already defined, renamed to X2"
-conflicts on *some* launches — ruled out duplicate DLL and duplicate process; a
-re-entry guard on `EntryPoint.Main` was added on the theory that RPH sometimes
-invokes `Main()` twice. Unconfirmed — if it recurs, check `EmsMod.log` for the
-`EntryPoint.Main invoked again` warning to confirm/deny that theory. Note: even
-when it happens, the commands still work (under the `2`-suffixed name), so it does
-not block functional testing.
+**RESOLVED (2026-08-08) — the "console command already defined, renamed to X2"
+wall of conflicts:** root cause was **double registration**. RPH *automatically*
+registers every `[ConsoleCommand]`-attributed method in a loaded plugin assembly,
+and `EntryPoint.Main` was *also* calling `Game.AddConsoleCommands(...)` — so each
+command was defined twice and RPH renamed the second copy to `<name>2`. Fix:
+**removed the explicit `Game.AddConsoleCommands` call** and rely solely on RPH's
+auto-registration; each command now registers exactly once under its real name.
+(The earlier `Main` re-entry guard could never have fixed this — the duplicate
+came from RPH's own scan, not a second `Main()` call. The guard is harmless and
+was left in place as a cheap safety net.) A stale old-build `EmsMod.dll` was also
+overwritten with the fresh build during this fix.
 
 **Next up (Phase 4):** first real callout, `CarAccident_Bleeding` — real config
 XML, dialogue, assessment options, and the transport-percentage resolution logic,
