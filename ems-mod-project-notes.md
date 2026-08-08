@@ -86,21 +86,22 @@ needed.
 
 ## Build Order Reference
 
-See the approved architecture plan (entity registry, input abstraction,
-`CalloutBase` state machine, config validation, phased build order) —
-captured in this project's memory and originally written to
-`C:\Users\sgmi6\.claude\plans\swirling-booping-taco.md`. Summary of phases:
+See **`ARCHITECTURE.md`** (committed in the repo root) for the full design
+blueprint — entity registry, input abstraction, `CalloutBase` state machine,
+config validation, and the phased build order with a status note on what's
+done and what differed from the original plan. See `DEVELOPMENT.md` for the
+gaming-PC setup and current-state handover. Summary of phases:
 
 0. Scaffolding — **done**, builds clean (.NET Framework 4.8 / x64, RPH SDK
    v1.131.1424.17745 vendored in `lib/`).
 1. Foundation infra (`Log`/`Safe`, `ConfigLoader`, `EntitySpawnRegistry`,
-   `InputManager`) — **next up**, no callout yet, each piece smoke-tested
+   `InputManager`) — **done**, no callout yet, each piece smoke-tested
    independently via debug console commands.
-2. `PromptUI` (accept/decline) + `DialogueEngine`/TTS skeleton.
+2. `PromptUI` (accept/decline) + `DialogueEngine`/TTS skeleton. — **done**
 3. `CalloutBase`/`CalloutManager` skeleton + trivial `TestCallout` vertical
    slice — proves the whole pattern (watchdogs, cleanup, state machine)
-   before any real content.
-4. First real callout: `CarAccident_Bleeding`.
+   before any real content. — **done**
+4. First real callout: `CarAccident_Bleeding`. — **next up**
 5. Second/third callouts as thin subclasses — audit point for shared logic.
 6. Remaining roster + "Call Police" + NAudio voice swap, expanding
    incrementally from proven infra.
