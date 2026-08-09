@@ -66,5 +66,37 @@ namespace EmsMod.Config
                 return (CalloutConfig)serializer.Deserialize(stream);
             }
         }
+
+        private static DutyConfig _duty;
+
+        public static DutyConfig Duty => _duty ?? (_duty = LoadDuty());
+
+        public static void ReloadDuty()
+        {
+            _duty = LoadDuty();
+            Log.Info("Duty config reloaded.");
+        }
+
+        private static DutyConfig LoadDuty()
+        {
+            string path = Path.Combine(ModPaths.ConfigDirectory, "Duty.xml");
+            DutyConfig loaded = Safe.Run(() => DeserializeDuty(path), null, "ConfigLoader.LoadDuty");
+            return ConfigValidator.ValidateDuty(loaded);
+        }
+
+        private static DutyConfig DeserializeDuty(string path)
+        {
+            if (!File.Exists(path))
+            {
+                Log.Warn($"ConfigLoader: Duty.xml not found at '{path}', falling back to defaults.");
+                return null;
+            }
+
+            using (FileStream stream = File.OpenRead(path))
+            {
+                var serializer = new XmlSerializer(typeof(DutyConfig));
+                return (DutyConfig)serializer.Deserialize(stream);
+            }
+        }
     }
 }

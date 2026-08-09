@@ -57,6 +57,10 @@ namespace EmsMod.Callouts
                 }
                 while (State != before && State != CalloutState.CleanedUp);
             }, $"CalloutBase.TickCurrentState [{GetType().Name}]");
+
+            // Per-frame content hook (e.g. drawing a scene marker). Runs after
+            // the state machine so State reflects this frame.
+            Safe.Run(OnTick, $"CalloutBase.OnTick [{GetType().Name}]");
         }
 
         /// <summary>Runs once when the callout is dispatched (popup shown).
@@ -93,7 +97,23 @@ namespace EmsMod.Callouts
             return false;
         }
 
+        /// <summary>Runs once when the callout enters Resolution (transport roll,
+        /// resolution message/voice, any "thank you" reaction setup).</summary>
         protected virtual void OnResolved()
+        {
+        }
+
+        /// <summary>Ticked every frame while in Resolution; cleanup is held until
+        /// this returns true. Default is immediate (original behavior); override
+        /// to hold briefly so a resolution reaction is visible before despawn.</summary>
+        protected virtual bool IsResolutionComplete()
+        {
+            return true;
+        }
+
+        /// <summary>Ticked every frame the callout is active, regardless of state.
+        /// For per-frame drawing (markers) and similar. Default does nothing.</summary>
+        protected virtual void OnTick()
         {
         }
 
@@ -205,8 +225,12 @@ namespace EmsMod.Callouts
                     break;
 
                 case CalloutState.Resolution:
-                    OnResolved();
-                    SetState(CalloutState.CleaningUp);
+                    // OnResolved ran on entry (SetState); hold here until the
+                    // callout reports the resolution moment is finished.
+                    if (IsResolutionComplete())
+                    {
+                        SetState(CalloutState.CleaningUp);
+                    }
                     break;
 
                 case CalloutState.CleaningUp:
@@ -248,6 +272,10 @@ namespace EmsMod.Callouts
                     _sceneAnchor = Game.LocalPlayer.Character.Position;
                     _walkedAwayElapsed = 0f;
                     OnSceneArrived();
+                    break;
+
+                case CalloutState.Resolution:
+                    Safe.Run(OnResolved, $"CalloutBase.OnResolved [{GetType().Name}]");
                     break;
 
                 case CalloutState.CleanedUp:

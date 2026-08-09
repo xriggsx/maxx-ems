@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DutyConfig>
+  <!-- Hospitals used for "nearest hospital" on-duty start and death respawn. -->
+  <Hospitals>
+    <Hospital><Name>Pillbox Hill Medical Center</Name><X>298.6</X><Y>-584.9</Y><Z>43.3</Z><Heading>70</Heading></Hospital>
+    <Hospital><Name>Central Los Santos Medical Center</Name><X>340.6</X><Y>-1396.6</Y><Z>32.5</Z><Heading>240</Heading></Hospital>
+    <Hospital><Name>Mount Zonah Medical Center</Name><X>-449.7</X><Y>-340.3</Y><Z>34.5</Z><Heading>250</Heading></Hospital>
+    <Hospital><Name>Sandy Shores Medical Center</Name><X>1839.6</X><Y>3672.9</Y><Z>34.3</Z><Heading>210</Heading></Hospital>
+    <Hospital><Name>Paleto Bay Care Center</Name><X>-247.8</X><Y>6330.3</Y><Z>32.4</Z><Heading>220</Heading></Hospital>
+  </Hospitals>
+
+  <!-- Per-mode curated picks. Add your add-on uniform peds / vehicles here
+       (model names) once installed via OpenIV - no rebuild needed. -->
+  <Modes>
+    <DutyMode>
+      <Name>Paramedic</Name>
+      <Characters>
+        <string>s_m_m_paramedic_01</string>
+        <string>s_f_y_scrubs_01</string>
+      </Characters>
+      <Vehicles>
+        <string>ambulance</string>
+      </Vehicles>
+    </DutyMode>
+    <DutyMode>
+      <Name>Firefighter</Name>
+      <Characters>
+        <string>s_m_y_fireman_01</string>
+      </Characters>
+      <Vehicles>
+        <string>firetruk</string>
+      </Vehicles>
+    </DutyMode>
+  </Modes>
+</DutyConfig>

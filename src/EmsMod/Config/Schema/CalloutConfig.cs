@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace EmsMod.Config.Schema
 {
     /// <summary>
@@ -31,7 +33,18 @@ namespace EmsMod.Config.Schema
         public string ResolutionVoiceLine { get; set; } = "Nice work. The patient is going to be just fine.";
 
         // --- Numbers / behavior ---
-        // 0-100: rolled at resolution; treated-on-scene vs transported-to-hospital.
+        // The pool of possible injuries for this callout - one is picked at
+        // random per dispatch, and ITS severity drives the pose/transport so the
+        // description and pose always match. Define a few with varied severities.
+        // If empty, falls back to the single Severity value below.
+        public List<Injury> Injuries { get; set; } = new List<Injury>();
+
+        // Fallback severity used only when Injuries is empty: "Minor"/"Moderate"/
+        // "Severe", or "Random" to roll one per dispatch.
+        public string Severity { get; set; } = "Random";
+
+        // Legacy random-roll transport chance; no longer used for the outcome
+        // (severity decides now) but kept so old configs still deserialize.
         public int TransportPercentage { get; set; } = 40;
 
         // How far ahead of the player the scene is placed (meters), snapped to a street.
@@ -45,5 +58,60 @@ namespace EmsMod.Config.Schema
 
         // Optional parked vehicle at the scene; empty/whitespace = no vehicle.
         public string SceneVehicleModel { get; set; } = "asea";
+
+        // Optional idle scenario the patient plays while waiting for help (reads
+        // as "waiting/hurt" without a risky custom animation). Empty/whitespace =
+        // patient just stands still. Kept kid-friendly - no injury/collapse poses.
+        public string PatientScenario { get; set; } = "WORLD_HUMAN_STAND_IMPATIENT";
+
+        // --- Polish ---
+
+        // A glowing marker on the ground at the scene while heading there and
+        // during treatment, so it's obvious where to go / stand.
+        public bool ShowSceneMarker { get; set; } = true;
+
+        // Animation the player plays during the treatment beat (kneeling medic
+        // pose). Empty dictionary/name = player just stands. Loader verifies the
+        // dictionary exists first, so an invalid clip is harmless.
+        public string TreatmentAnimDictionary { get; set; } = "amb@medic@standing@kneel@base";
+        public string TreatmentAnimName { get; set; } = "base";
+
+        // After treatment, the patient reacts happily and thanks the player, and
+        // the callout holds this long (seconds) so the moment is visible before
+        // everything despawns.
+        public string PatientThanksScenario { get; set; } = "WORLD_HUMAN_CHEERING";
+        public string PatientThanksText { get; set; } = "Thank you so much!";
+        public float ResolutionHoldSeconds { get; set; } = 5f;
+
+        // Give the scene vehicle a crashed look (dents, engine off). Kept
+        // kid-friendly - no fire. Off for non-car scenes (e.g. a bike).
+        public bool DamageSceneVehicle { get; set; } = false;
+
+        // Optional sitting/injured pose (looped animation) the patient holds
+        // while waiting, instead of PatientScenario. Both empty = fall back to
+        // PatientScenario, then to just standing. Kept kid-friendly.
+        public string PatientPoseAnimDictionary { get; set; } = "";
+        public string PatientPoseAnimName { get; set; } = "";
+
+        // On-scene injury conversation, advanced one single-tap at a time
+        // (patient says whether they're okay/hurt; player reassures). Empty =
+        // skip straight to the "press to help" treatment step.
+        public List<DialogueLine> AssessmentLines { get; set; } = new List<DialogueLine>();
+        public string ConversationHelpText { get; set; } = "Press E (or X on controller) to talk to the patient.";
+
+        // Friendly success feedback. Sound is a GTA frontend sound (name + set).
+        public bool PlaySuccessSound { get; set; } = true;
+        public string SuccessSoundName { get; set; } = "CHECKPOINT_PERFECT";
+        public string SuccessSoundSet { get; set; } = "HUD_MINI_GAME_SOUNDSET";
+        public bool ShowPatientsHelpedCount { get; set; } = true;
+
+        // Transport outcome: an ambulance drives in, the patient loads up, and
+        // it drives off (instead of just a text notification).
+        public bool ShowAmbulanceOnTransport { get; set; } = true;
+        public string AmbulanceModel { get; set; } = "ambulance";
+        public string ParamedicModel { get; set; } = "s_m_m_paramedic_01";
+        // Overall safety cap for the whole ambulance sequence; it normally
+        // finishes sooner (once the ambulance has driven off).
+        public float TransportSequenceSeconds { get; set; } = 40f;
     }
 }

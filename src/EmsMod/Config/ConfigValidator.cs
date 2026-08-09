@@ -67,6 +67,36 @@ namespace EmsMod.Config
                 config.TreatmentSeconds = defaults.TreatmentSeconds;
             }
 
+            if (config.ResolutionHoldSeconds < 0f)
+            {
+                config.ResolutionHoldSeconds = defaults.ResolutionHoldSeconds;
+            }
+
+            if (config.TransportSequenceSeconds < 0f)
+            {
+                config.TransportSequenceSeconds = defaults.TransportSequenceSeconds;
+            }
+
+            if (config.AssessmentLines == null)
+            {
+                config.AssessmentLines = new System.Collections.Generic.List<Schema.DialogueLine>();
+            }
+
+            if (config.Injuries == null)
+            {
+                config.Injuries = new System.Collections.Generic.List<Schema.Injury>();
+            }
+            else
+            {
+                foreach (Schema.Injury injury in config.Injuries)
+                {
+                    if (injury != null && injury.AssessmentLines == null)
+                    {
+                        injury.AssessmentLines = new System.Collections.Generic.List<Schema.DialogueLine>();
+                    }
+                }
+            }
+
             // Text: an empty element (<X></X>) deserializes to "" and would show
             // a blank prompt/notification - backfill those to the defaults.
             config.DispatchText = FallbackIfBlank(config.DispatchText, defaults.DispatchText);
@@ -87,6 +117,59 @@ namespace EmsMod.Config
         private static string FallbackIfBlank(string value, string fallback)
         {
             return string.IsNullOrWhiteSpace(value) ? fallback : value;
+        }
+
+        public static DutyConfig ValidateDuty(DutyConfig config)
+        {
+            if (config == null)
+            {
+                config = new DutyConfig();
+            }
+
+            if (config.Hospitals == null || config.Hospitals.Count == 0)
+            {
+                Log.Warn("ConfigValidator: no hospitals in Duty config, using built-in defaults.");
+                config.Hospitals = DefaultHospitals();
+            }
+
+            if (config.Modes == null || config.Modes.Count == 0)
+            {
+                Log.Warn("ConfigValidator: no duty modes in Duty config, using built-in defaults.");
+                config.Modes = DefaultModes();
+            }
+
+            return config;
+        }
+
+        private static System.Collections.Generic.List<Schema.Hospital> DefaultHospitals()
+        {
+            return new System.Collections.Generic.List<Schema.Hospital>
+            {
+                new Schema.Hospital { Name = "Pillbox Hill Medical Center", X = 298.6f, Y = -584.9f, Z = 43.3f, Heading = 70f },
+                new Schema.Hospital { Name = "Central Los Santos Medical Center", X = 340.6f, Y = -1396.6f, Z = 32.5f, Heading = 240f },
+                new Schema.Hospital { Name = "Mount Zonah Medical Center", X = -449.7f, Y = -340.3f, Z = 34.5f, Heading = 250f },
+                new Schema.Hospital { Name = "Sandy Shores Medical Center", X = 1839.6f, Y = 3672.9f, Z = 34.3f, Heading = 210f },
+                new Schema.Hospital { Name = "Paleto Bay Care Center", X = -247.8f, Y = 6330.3f, Z = 32.4f, Heading = 220f },
+            };
+        }
+
+        private static System.Collections.Generic.List<Schema.DutyMode> DefaultModes()
+        {
+            return new System.Collections.Generic.List<Schema.DutyMode>
+            {
+                new Schema.DutyMode
+                {
+                    Name = "Paramedic",
+                    Characters = new System.Collections.Generic.List<string> { "s_m_m_paramedic_01", "s_f_y_scrubs_01" },
+                    Vehicles = new System.Collections.Generic.List<string> { "ambulance" },
+                },
+                new Schema.DutyMode
+                {
+                    Name = "Firefighter",
+                    Characters = new System.Collections.Generic.List<string> { "s_m_y_fireman_01" },
+                    Vehicles = new System.Collections.Generic.List<string> { "firetruk" },
+                },
+            };
         }
     }
 }

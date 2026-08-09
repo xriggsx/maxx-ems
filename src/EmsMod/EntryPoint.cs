@@ -62,6 +62,7 @@ namespace EmsMod
                     try
                     {
                         DialogueEngine.Tick();
+                        DutyManager.Tick();
                         CalloutManager.Tick();
                         GameFiber.Yield();
                     }

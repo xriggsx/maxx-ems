@@ -221,5 +221,17 @@ namespace EmsMod.Debug
                     : "CalloutCarAccident: a callout is already active.");
             }, "DebugCommands.CalloutCarAccident");
         }
+
+        [ConsoleCommand(Name = "emsmod_callout_bikeaccident", Description = "Dispatches the BikeAccident_ScrapedKnee callout (Phase 5 second callout).")]
+        public static void CalloutBikeAccident()
+        {
+            Safe.Run(() =>
+            {
+                bool dispatched = CalloutManager.Dispatch(new BikeAccident_ScrapedKnee());
+                Log.Info(dispatched
+                    ? "CalloutBikeAccident: dispatched. Accept the popup, drive to the yellow blip, get out and walk up, then press E/X to help the rider."
+                    : "CalloutBikeAccident: a callout is already active.");
+            }, "DebugCommands.CalloutBikeAccident");
+        }
     }
 }

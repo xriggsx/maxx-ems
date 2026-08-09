@@ -16,9 +16,91 @@
   <TransportedText>The patient is taken to the hospital for a checkup. Great job!</TransportedText>
   <ResolutionVoiceLine>Nice work. The patient is going to be just fine.</ResolutionVoiceLine>
 
+  <!-- One of these is picked at random per dispatch; its severity sets the pose
+       (Minor=stand, Moderate=kneel, Severe=lie down) and whether transport is
+       needed, so the pose always matches the injury. -->
+  <Injuries>
+    <Injury>
+      <Severity>Minor</Severity>
+      <DispatchText>Minor car bump. Someone has a small cut and needs a bandage.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. Minor car bump nearby, a person has a small cut. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>I just got a little cut, it stings a bit.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>No worries, let me pop a bandage on that.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>All better! Just a small cut - cleaned and bandaged.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Moderate</Severity>
+      <DispatchText>Car accident. Someone has hurt their arm and needs help.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. Car accident nearby, a person has hurt their arm. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>Ow, my arm really hurts. I banged it in the crash.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Sit tight, I'll wrap it up and get you comfy.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>Nice work - arm wrapped up and the patient feels much better.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Severe</Severity>
+      <DispatchText>Serious car accident. Someone is hurt badly and may need the hospital.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. Serious car accident nearby, a person is badly hurt. Please respond quickly.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>I feel really dizzy... my head hurts a lot.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Stay still, you're going to be okay. Let's get you to the hospital.</Text></DialogueLine>
+      </AssessmentLines>
+      <TransportedText>Great job! The patient is safely taken to the hospital for care.</TransportedText>
+    </Injury>
+  </Injuries>
+
+  <Severity>Random</Severity>
   <TransportPercentage>40</TransportPercentage>
   <SceneSpawnDistance>60</SceneSpawnDistance>
   <ArrivalRadius>12</ArrivalRadius>
   <TreatmentSeconds>4</TreatmentSeconds>
   <SceneVehicleModel>asea</SceneVehicleModel>
+  <PatientScenario>WORLD_HUMAN_STAND_IMPATIENT</PatientScenario>
+
+  <ShowSceneMarker>true</ShowSceneMarker>
+  <TreatmentAnimDictionary>amb@medic@standing@kneel@base</TreatmentAnimDictionary>
+  <TreatmentAnimName>base</TreatmentAnimName>
+  <PatientThanksScenario>WORLD_HUMAN_CHEERING</PatientThanksScenario>
+  <PatientThanksText>Thank you so much!</PatientThanksText>
+  <ResolutionHoldSeconds>5</ResolutionHoldSeconds>
+  <DamageSceneVehicle>true</DamageSceneVehicle>
+
+  <!-- Sitting/injured pose (looped). This clip sits the patient on the ground
+       looking a bit hurt. Loader verifies the dict exists first, so swapping in
+       a different clip is safe - if it's invalid the patient just stands. -->
+  <PatientPoseAnimDictionary>timetable@floyd@cryendcutscene@base</PatientPoseAnimDictionary>
+  <PatientPoseAnimName>cry_floyd</PatientPoseAnimName>
+
+  <ConversationHelpText>Press E (or X on controller) to talk to the patient.</ConversationHelpText>
+  <AssessmentLines>
+    <DialogueLine>
+      <Speaker>Patient</Speaker>
+      <Text>Ow... I bumped my arm in the crash. It stings a little.</Text>
+    </DialogueLine>
+    <DialogueLine>
+      <Speaker>You</Speaker>
+      <Text>It's okay, I'm here to help. Can you move it alright?</Text>
+    </DialogueLine>
+    <DialogueLine>
+      <Speaker>Patient</Speaker>
+      <Text>Yeah, I can move it. It's just a small cut.</Text>
+    </DialogueLine>
+    <DialogueLine>
+      <Speaker>You</Speaker>
+      <Text>Great. Let me clean it up and put a bandage on.</Text>
+    </DialogueLine>
+  </AssessmentLines>
+
+  <PlaySuccessSound>true</PlaySuccessSound>
+  <SuccessSoundName>CHECKPOINT_PERFECT</SuccessSoundName>
+  <SuccessSoundSet>HUD_MINI_GAME_SOUNDSET</SuccessSoundSet>
+  <ShowPatientsHelpedCount>true</ShowPatientsHelpedCount>
+
+  <ShowAmbulanceOnTransport>true</ShowAmbulanceOnTransport>
+  <AmbulanceModel>ambulance</AmbulanceModel>
+  <ParamedicModel>s_m_m_paramedic_01</ParamedicModel>
+  <TransportSequenceSeconds>40</TransportSequenceSeconds>
 </CalloutConfig>

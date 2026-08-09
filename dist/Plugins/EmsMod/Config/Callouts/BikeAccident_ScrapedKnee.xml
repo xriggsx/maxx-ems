@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalloutConfig>
+  <DispatchText>A bike rider took a tumble and scraped their knee. They need a bandage.</DispatchText>
+  <DispatchVoiceLine>Dispatch to all units. A bike rider fell and scraped their knee nearby. Please respond to help.</DispatchVoiceLine>
+
+  <EnRouteHelpText>Drive to the yellow marker, then get out and walk up to the rider.</EnRouteHelpText>
+  <EnRouteVoiceLine>Responding to the scene.</EnRouteVoiceLine>
+
+  <OnSceneText>You're on scene. Check on the rider.</OnSceneText>
+  <OnSceneVoiceLine>On scene. Checking on the rider now.</OnSceneVoiceLine>
+
+  <AssessmentHelpText>Press E (or X on controller) to help the rider.</AssessmentHelpText>
+  <TreatingText>Cleaning the scrape and putting on a bandage...</TreatingText>
+
+  <TreatedText>All better! The scrape is cleaned up and bandaged. Good as new!</TreatedText>
+  <TransportedText>Just to be safe, the rider gets a checkup at the hospital. Great job!</TransportedText>
+  <ResolutionVoiceLine>Nice work. The rider is going to be just fine.</ResolutionVoiceLine>
+
+  <!-- One picked at random per dispatch; severity sets pose + transport. -->
+  <Injuries>
+    <Injury>
+      <Severity>Minor</Severity>
+      <DispatchText>A bike rider scraped their knee and needs a bandage.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A bike rider scraped their knee nearby. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Rider</Speaker><Text>I scraped my knee when I fell. It stings a little.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Easy fix - let me clean it and put a bandage on.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>All better! Knee cleaned up and bandaged. Good as new!</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Moderate</Severity>
+      <DispatchText>A bike rider fell and twisted their ankle. They need help.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A bike rider twisted their ankle nearby. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Rider</Speaker><Text>I twisted my ankle, it's hard to stand on it.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Let's get you sitting and wrap that ankle up.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>Nice work - ankle wrapped and the rider feels much better.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Severe</Severity>
+      <DispatchText>A bike rider took a bad fall and hit their head. May need the hospital.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A bike rider took a bad fall and hit their head nearby. Please respond quickly.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Rider</Speaker><Text>I hit my head when I fell... I feel really dizzy.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Stay still, you'll be okay. We'll get you to the hospital.</Text></DialogueLine>
+      </AssessmentLines>
+      <TransportedText>Great job! The rider is safely taken to the hospital for a checkup.</TransportedText>
+    </Injury>
+  </Injuries>
+
+  <Severity>Random</Severity>
+  <TransportPercentage>10</TransportPercentage>
+  <SceneSpawnDistance>60</SceneSpawnDistance>
+  <ArrivalRadius>12</ArrivalRadius>
+  <TreatmentSeconds>4</TreatmentSeconds>
+  <SceneVehicleModel>bmx</SceneVehicleModel>
+  <PatientScenario>WORLD_HUMAN_STAND_IMPATIENT</PatientScenario>
+
+  <ShowSceneMarker>true</ShowSceneMarker>
+  <TreatmentAnimDictionary>amb@medic@standing@kneel@base</TreatmentAnimDictionary>
+  <TreatmentAnimName>base</TreatmentAnimName>
+  <PatientThanksScenario>WORLD_HUMAN_CHEERING</PatientThanksScenario>
+  <PatientThanksText>Thanks! My knee feels much better!</PatientThanksText>
+  <ResolutionHoldSeconds>5</ResolutionHoldSeconds>
+  <DamageSceneVehicle>false</DamageSceneVehicle>
+
+  <!-- Sitting/injured pose (looped). Loader verifies the dict exists first. -->
+  <PatientPoseAnimDictionary>timetable@floyd@cryendcutscene@base</PatientPoseAnimDictionary>
+  <PatientPoseAnimName>cry_floyd</PatientPoseAnimName>
+
+  <ConversationHelpText>Press E (or X on controller) to talk to the rider.</ConversationHelpText>
+  <AssessmentLines>
+    <DialogueLine>
+      <Speaker>Rider</Speaker>
+      <Text>Ow, I fell off my bike and scraped my knee.</Text>
+    </DialogueLine>
+    <DialogueLine>
+      <Speaker>You</Speaker>
+      <Text>That looks sore. Can you stand up okay?</Text>
+    </DialogueLine>
+    <DialogueLine>
+      <Speaker>Rider</Speaker>
+      <Text>Yeah, I can stand. It just stings a bit.</Text>
+    </DialogueLine>
+    <DialogueLine>
+      <Speaker>You</Speaker>
+      <Text>No problem. Let me clean it up and put a bandage on.</Text>
+    </DialogueLine>
+  </AssessmentLines>
+
+  <PlaySuccessSound>true</PlaySuccessSound>
+  <SuccessSoundName>CHECKPOINT_PERFECT</SuccessSoundName>
+  <SuccessSoundSet>HUD_MINI_GAME_SOUNDSET</SuccessSoundSet>
+  <ShowPatientsHelpedCount>true</ShowPatientsHelpedCount>
+
+  <ShowAmbulanceOnTransport>true</ShowAmbulanceOnTransport>
+  <AmbulanceModel>ambulance</AmbulanceModel>
+  <ParamedicModel>s_m_m_paramedic_01</ParamedicModel>
+  <TransportSequenceSeconds>40</TransportSequenceSeconds>
+</CalloutConfig>
