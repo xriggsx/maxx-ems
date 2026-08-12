@@ -33,5 +33,13 @@ namespace EmsMod.Config.Schema
 
         // Response vehicle model names for this mode.
         public List<string> Vehicles { get; set; } = new List<string>();
+
+        // Usable tools given on duty and browsable in the menu (weapon-slot
+        // TOOLS only - fire extinguisher, flashlight - never violent weapons).
+        public List<string> Equipment { get; set; } = new List<string>();
+
+        // Ped model for the AI partner who rides along in this mode. Empty =
+        // use the mode's first character.
+        public string PartnerModel { get; set; } = "";
     }
 }

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalloutConfig>
+  <DispatchText>Small fire - someone got a burn and needs help.</DispatchText>
+  <DispatchVoiceLine>Dispatch to all units. A small fire nearby, someone has a burn. Please respond.</DispatchVoiceLine>
+
+  <EnRouteHelpText>Drive to the yellow marker, then get out and walk up to the patient.</EnRouteHelpText>
+  <EnRouteVoiceLine>Responding to the fire.</EnRouteVoiceLine>
+
+  <OnSceneText>You're on scene. Check on the patient.</OnSceneText>
+  <OnSceneVoiceLine>On scene. Checking on the patient now.</OnSceneVoiceLine>
+
+  <AssessmentHelpText>Press E (or X on controller) to help the patient.</AssessmentHelpText>
+  <ConversationHelpText>Press E (or X on controller) to talk to the patient.</ConversationHelpText>
+  <TreatingText>Cooling the burn and covering it...</TreatingText>
+  <ResolutionVoiceLine>Nice work. The patient is going to be just fine.</ResolutionVoiceLine>
+
+  <Injuries>
+    <Injury>
+      <Severity>Minor</Severity>
+      <DispatchText>Small fire - someone has a little burn on their hand.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A small fire nearby, someone has a minor burn. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>I touched the flames and burnt my hand a little.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Let's cool that under water and pop a light dressing on.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>All better! The burn is cooled and covered - good as new.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Moderate</Severity>
+      <DispatchText>Small fire - someone has a sore burn that needs dressing.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A small fire nearby, someone has a sore burn. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>The burn really stings, it's gone a bit blistery.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>I'll cool it properly and wrap it up nice and clean.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>Nice work - burn cooled and dressed, the patient feels much better.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Severe</Severity>
+      <DispatchText>Fire - someone has a bad burn and needs the hospital.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A fire nearby, someone has a bad burn. Please respond quickly.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>It's a really bad burn... it hurts so much.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>I'm cooling it and covering it - the ambulance will take you to hospital.</Text></DialogueLine>
+      </AssessmentLines>
+      <TransportedText>Great job! The patient is taken to the hospital to care for the burn.</TransportedText>
+    </Injury>
+  </Injuries>
+
+  <SceneVehicleModel></SceneVehicleModel>
+  <SceneFireProp>prop_barrel_02a</SceneFireProp>
+  <PatientScenario>WORLD_HUMAN_STAND_IMPATIENT</PatientScenario>
+</CalloutConfig>

@@ -47,7 +47,13 @@ namespace EmsMod.Config.Schema
         // (severity decides now) but kept so old configs still deserialize.
         public int TransportPercentage { get; set; } = 40;
 
-        // How far ahead of the player the scene is placed (meters), snapped to a street.
+        // Scene distance ahead of the player is rolled randomly per dispatch
+        // between these two (meters), snapped to a street, so callouts vary from
+        // "short drive" to "proper drive". Min kept high enough to never be silly-close.
+        public float SceneSpawnDistanceMin { get; set; } = 120f;
+        public float SceneSpawnDistanceMax { get; set; } = 450f;
+
+        // Legacy fixed distance (no longer used for the roll; kept for old configs).
         public float SceneSpawnDistance { get; set; } = 60f;
 
         // How close (meters), on foot, the player must get before arrival counts.
@@ -86,6 +92,14 @@ namespace EmsMod.Config.Schema
         // Give the scene vehicle a crashed look (dents, engine off). Kept
         // kid-friendly - no fire. Off for non-car scenes (e.g. a bike).
         public bool DamageSceneVehicle { get; set; } = false;
+
+        // --- Fire scene (firefighter callouts) ---
+        // Optional burning prop spawned at the scene as fire flavour (e.g. a
+        // barrel/debris). Empty = none. The player and patient are made
+        // fireproof while on scene so it stays kid-safe (no fail state).
+        public string SceneFireProp { get; set; } = "";
+        // Set the scene vehicle on fire (for a vehicle-fire rescue).
+        public bool BurnSceneVehicle { get; set; } = false;
 
         // Optional sitting/injured pose (looped animation) the patient holds
         // while waiting, instead of PatientScenario. Both empty = fall back to

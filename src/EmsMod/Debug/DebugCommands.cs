@@ -233,5 +233,65 @@ namespace EmsMod.Debug
                     : "CalloutBikeAccident: a callout is already active.");
             }, "DebugCommands.CalloutBikeAccident");
         }
+
+        [ConsoleCommand(Name = "emsmod_callout_playgroundfall", Description = "Dispatches the PlaygroundFall_TwistedAnkle callout.")]
+        public static void CalloutPlaygroundFall()
+        {
+            Safe.Run(() =>
+            {
+                bool dispatched = CalloutManager.Dispatch(new PlaygroundFall_TwistedAnkle());
+                Log.Info(dispatched ? "CalloutPlaygroundFall: dispatched." : "CalloutPlaygroundFall: a callout is already active.");
+            }, "DebugCommands.CalloutPlaygroundFall");
+        }
+
+        [ConsoleCommand(Name = "emsmod_callout_sportsinjury", Description = "Dispatches the SportsInjury_PossibleFracture callout.")]
+        public static void CalloutSportsInjury()
+        {
+            Safe.Run(() =>
+            {
+                bool dispatched = CalloutManager.Dispatch(new SportsInjury_PossibleFracture());
+                Log.Info(dispatched ? "CalloutSportsInjury: dispatched." : "CalloutSportsInjury: a callout is already active.");
+            }, "DebugCommands.CalloutSportsInjury");
+        }
+
+        [ConsoleCommand(Name = "emsmod_callout_asthma", Description = "Dispatches the Asthma_BreathingTrouble callout.")]
+        public static void CalloutAsthma()
+        {
+            Safe.Run(() =>
+            {
+                bool dispatched = CalloutManager.Dispatch(new Asthma_BreathingTrouble());
+                Log.Info(dispatched ? "CalloutAsthma: dispatched." : "CalloutAsthma: a callout is already active.");
+            }, "DebugCommands.CalloutAsthma");
+        }
+
+        [ConsoleCommand(Name = "emsmod_callout_housefire", Description = "Dispatches the HouseFire_SmokeInhalation firefighter callout.")]
+        public static void CalloutHouseFire()
+        {
+            Safe.Run(() =>
+            {
+                bool dispatched = CalloutManager.Dispatch(new HouseFire_SmokeInhalation());
+                Log.Info(dispatched ? "CalloutHouseFire: dispatched." : "CalloutHouseFire: a callout is already active.");
+            }, "DebugCommands.CalloutHouseFire");
+        }
+
+        [ConsoleCommand(Name = "emsmod_callout_vehiclefire", Description = "Dispatches the VehicleFire_Rescue firefighter callout.")]
+        public static void CalloutVehicleFire()
+        {
+            Safe.Run(() =>
+            {
+                bool dispatched = CalloutManager.Dispatch(new VehicleFire_Rescue());
+                Log.Info(dispatched ? "CalloutVehicleFire: dispatched." : "CalloutVehicleFire: a callout is already active.");
+            }, "DebugCommands.CalloutVehicleFire");
+        }
+
+        [ConsoleCommand(Name = "emsmod_callout_kitchenfire", Description = "Dispatches the KitchenFire_MinorBurn firefighter callout.")]
+        public static void CalloutKitchenFire()
+        {
+            Safe.Run(() =>
+            {
+                bool dispatched = CalloutManager.Dispatch(new KitchenFire_MinorBurn());
+                Log.Info(dispatched ? "CalloutKitchenFire: dispatched." : "CalloutKitchenFire: a callout is already active.");
+            }, "DebugCommands.CalloutKitchenFire");
+        }
     }
 }

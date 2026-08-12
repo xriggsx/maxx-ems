@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalloutConfig>
+  <DispatchText>Someone is having trouble breathing and needs help.</DispatchText>
+  <DispatchVoiceLine>Dispatch to all units. A person is having breathing trouble nearby. Please respond.</DispatchVoiceLine>
+
+  <EnRouteHelpText>Drive to the yellow marker, then get out and walk up to the patient.</EnRouteHelpText>
+  <EnRouteVoiceLine>Responding to the scene.</EnRouteVoiceLine>
+
+  <OnSceneText>You're on scene. Check on the patient.</OnSceneText>
+  <OnSceneVoiceLine>On scene. Checking on the patient now.</OnSceneVoiceLine>
+
+  <AssessmentHelpText>Press E (or X on controller) to help the patient.</AssessmentHelpText>
+  <ConversationHelpText>Press E (or X on controller) to talk to the patient.</ConversationHelpText>
+  <TreatingText>Helping the patient with their breathing...</TreatingText>
+  <ResolutionVoiceLine>Nice work. The patient is breathing easier now.</ResolutionVoiceLine>
+
+  <Injuries>
+    <Injury>
+      <Severity>Minor</Severity>
+      <DispatchText>Someone has a mild wheeze and needs a hand with their inhaler.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A person has a mild wheeze nearby. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>I'm a bit wheezy... I just need my inhaler.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Here you go - nice slow breaths.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatingText>Helping them use their inhaler...</TreatingText>
+      <TreatedText>All better! Breathing is nice and easy again.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Moderate</Severity>
+      <DispatchText>Someone is short of breath and needs help calming down.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A person is short of breath nearby. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>It's hard to catch my breath...</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>I've got you. Use your inhaler and breathe with me - in and out.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatingText>Coaching slow breaths and giving oxygen...</TreatingText>
+      <TreatedText>Nice work - breathing has settled and the patient feels much better.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Severe</Severity>
+      <DispatchText>Someone is having a bad asthma attack - needs the hospital.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A person is having a bad asthma attack nearby. Please respond quickly.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>I... can't... breathe well...</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Stay calm, I'm giving you oxygen - we're going to the hospital now.</Text></DialogueLine>
+      </AssessmentLines>
+      <TransportedText>Great job! The patient is rushed to the hospital and is going to be okay.</TransportedText>
+    </Injury>
+  </Injuries>
+
+  <SceneVehicleModel></SceneVehicleModel>
+  <PatientScenario>WORLD_HUMAN_STAND_IMPATIENT</PatientScenario>
+</CalloutConfig>

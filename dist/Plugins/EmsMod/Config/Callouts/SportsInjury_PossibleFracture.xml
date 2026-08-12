@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalloutConfig>
+  <DispatchText>Someone got hurt playing sport and needs help.</DispatchText>
+  <DispatchVoiceLine>Dispatch to all units. A player is injured at a sports field nearby. Please respond.</DispatchVoiceLine>
+
+  <EnRouteHelpText>Drive to the yellow marker, then get out and walk up to the patient.</EnRouteHelpText>
+  <EnRouteVoiceLine>Responding to the scene.</EnRouteVoiceLine>
+
+  <OnSceneText>You're on scene. Check on the player.</OnSceneText>
+  <OnSceneVoiceLine>On scene. Checking on the player now.</OnSceneVoiceLine>
+
+  <AssessmentHelpText>Press E (or X on controller) to help the player.</AssessmentHelpText>
+  <ConversationHelpText>Press E (or X on controller) to talk to the player.</ConversationHelpText>
+  <TreatingText>Checking the injury and helping the player...</TreatingText>
+  <ResolutionVoiceLine>Nice work. The player is going to be just fine.</ResolutionVoiceLine>
+
+  <Injuries>
+    <Injury>
+      <Severity>Minor</Severity>
+      <DispatchText>A player got a knock and has a sore, bruised knee.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A player has a bruised knee at the field nearby. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Player</Speaker><Text>I got a knock on the knee, it's a bit sore.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Let me put an ice pack on it - you'll be fine.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatingText>Putting an ice pack on the knee...</TreatingText>
+      <TreatedText>All better! Just a bruise - iced and good to go.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Moderate</Severity>
+      <DispatchText>A player sprained their wrist and needs it wrapped.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A player sprained their wrist at the field nearby. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Player</Speaker><Text>I fell on my wrist, it's hard to move it.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Let's wrap that wrist up nice and snug.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatingText>Wrapping the wrist...</TreatingText>
+      <TreatedText>Nice work - wrist wrapped and the player feels much better.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Severe</Severity>
+      <DispatchText>A player may have broken their arm - needs the hospital.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A player may have a broken arm at the field nearby. Please respond quickly.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Player</Speaker><Text>My arm really hurts, I think it might be broken.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Hold still, I'll support it - we'll get you to the hospital for an x-ray.</Text></DialogueLine>
+      </AssessmentLines>
+      <TransportedText>Great job! The player is taken to the hospital to check the arm.</TransportedText>
+    </Injury>
+  </Injuries>
+
+  <SceneVehicleModel></SceneVehicleModel>
+  <PatientScenario>WORLD_HUMAN_STAND_IMPATIENT</PatientScenario>
+</CalloutConfig>

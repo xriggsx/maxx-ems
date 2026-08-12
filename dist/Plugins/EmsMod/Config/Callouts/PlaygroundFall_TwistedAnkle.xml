@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalloutConfig>
+  <DispatchText>Someone took a fall at the park and needs help.</DispatchText>
+  <DispatchVoiceLine>Dispatch to all units. A person has fallen at the park nearby. Please respond.</DispatchVoiceLine>
+
+  <EnRouteHelpText>Drive to the yellow marker, then get out and walk up to the patient.</EnRouteHelpText>
+  <EnRouteVoiceLine>Responding to the scene.</EnRouteVoiceLine>
+
+  <OnSceneText>You're on scene. Check on the patient.</OnSceneText>
+  <OnSceneVoiceLine>On scene. Checking on the patient now.</OnSceneVoiceLine>
+
+  <AssessmentHelpText>Press E (or X on controller) to help the patient.</AssessmentHelpText>
+  <ConversationHelpText>Press E (or X on controller) to talk to the patient.</ConversationHelpText>
+  <TreatingText>Checking the injury and helping the patient...</TreatingText>
+  <ResolutionVoiceLine>Nice work. The patient is going to be just fine.</ResolutionVoiceLine>
+
+  <Injuries>
+    <Injury>
+      <Severity>Minor</Severity>
+      <DispatchText>Someone slipped at the park and scraped their hands.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A person scraped their hands falling at the park. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>I slipped and scraped my hands. They sting a bit.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Let me clean those up and pop a bandage on.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatingText>Cleaning the scrapes and bandaging...</TreatingText>
+      <TreatedText>All better! Hands cleaned and bandaged. Good as new!</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Moderate</Severity>
+      <DispatchText>Someone twisted their ankle falling at the park.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A person twisted their ankle at the park nearby. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>I twisted my ankle, it really hurts to stand.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Sit tight, I'll wrap that ankle and get you comfy.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatingText>Wrapping the ankle...</TreatingText>
+      <TreatedText>Nice work - ankle wrapped and the patient feels much better.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Severe</Severity>
+      <DispatchText>Someone had a bad fall at the park and hurt their head.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. A person had a bad fall at the park and hurt their head. Please respond quickly.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Patient</Speaker><Text>I hit my head when I fell... everything feels dizzy.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Stay still, you're okay. Let's get you to the hospital.</Text></DialogueLine>
+      </AssessmentLines>
+      <TransportedText>Great job! The patient is safely taken to the hospital for care.</TransportedText>
+    </Injury>
+  </Injuries>
+
+  <SceneVehicleModel></SceneVehicleModel>
+  <PatientScenario>WORLD_HUMAN_STAND_IMPATIENT</PatientScenario>
+</CalloutConfig>

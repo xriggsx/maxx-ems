@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalloutConfig>
+  <DispatchText>Car fire - the driver is out but needs help. Respond quickly.</DispatchText>
+  <DispatchVoiceLine>Dispatch to all units. Vehicle fire nearby, the driver is out but needs help. Please respond.</DispatchVoiceLine>
+
+  <EnRouteHelpText>Drive to the yellow marker, then get out and walk up to the driver.</EnRouteHelpText>
+  <EnRouteVoiceLine>Responding to the vehicle fire.</EnRouteVoiceLine>
+
+  <OnSceneText>You're on scene. Check on the driver.</OnSceneText>
+  <OnSceneVoiceLine>On scene. Checking on the driver now.</OnSceneVoiceLine>
+
+  <AssessmentHelpText>Press E (or X on controller) to help the driver.</AssessmentHelpText>
+  <ConversationHelpText>Press E (or X on controller) to talk to the driver.</ConversationHelpText>
+  <TreatingText>Moving the driver to safety and checking them...</TreatingText>
+  <ResolutionVoiceLine>Nice work. The driver is safe now.</ResolutionVoiceLine>
+
+  <Injuries>
+    <Injury>
+      <Severity>Minor</Severity>
+      <DispatchText>Car fire - the driver got out and is just a bit shaken.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. Vehicle fire nearby, the driver is shaken but okay. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Driver</Speaker><Text>I got out okay, just a bit shaken up.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Come away from the car with me - you're safe now.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>All better! The driver is safe and calm, well away from the car.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Moderate</Severity>
+      <DispatchText>Car fire - the driver is coughing from the smoke.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. Vehicle fire nearby, the driver is coughing from smoke. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Driver</Speaker><Text>I breathed some smoke getting out, I'm coughing a lot.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Let's get you clear and on some oxygen.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>Nice work - driver's away from the fire and breathing easy.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Severe</Severity>
+      <DispatchText>Car fire - the driver is hurt and needs the hospital.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. Vehicle fire nearby, the driver is hurt. Please respond quickly.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Driver</Speaker><Text>My arm's burnt and I feel really faint...</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>I've got you - away from the car, the ambulance is coming for you.</Text></DialogueLine>
+      </AssessmentLines>
+      <TransportedText>Great job! The driver is safely taken to the hospital for care.</TransportedText>
+    </Injury>
+  </Injuries>
+
+  <SceneVehicleModel>asea</SceneVehicleModel>
+  <DamageSceneVehicle>true</DamageSceneVehicle>
+  <BurnSceneVehicle>true</BurnSceneVehicle>
+  <PatientScenario>WORLD_HUMAN_STAND_IMPATIENT</PatientScenario>
+</CalloutConfig>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CalloutConfig>
+  <DispatchText>House fire - a resident got out but breathed in smoke. They need help.</DispatchText>
+  <DispatchVoiceLine>Dispatch to all units. House fire nearby, a resident is out but has breathed smoke. Please respond.</DispatchVoiceLine>
+
+  <EnRouteHelpText>Drive to the yellow marker, then get out and walk up to the resident.</EnRouteHelpText>
+  <EnRouteVoiceLine>Responding to the fire.</EnRouteVoiceLine>
+
+  <OnSceneText>You're on scene. Check on the resident.</OnSceneText>
+  <OnSceneVoiceLine>On scene. Checking on the resident now.</OnSceneVoiceLine>
+
+  <AssessmentHelpText>Press E (or X on controller) to help the resident.</AssessmentHelpText>
+  <ConversationHelpText>Press E (or X on controller) to talk to the resident.</ConversationHelpText>
+  <TreatingText>Giving oxygen and helping them breathe...</TreatingText>
+  <ResolutionVoiceLine>Nice work. The resident is breathing easier now.</ResolutionVoiceLine>
+
+  <Injuries>
+    <Injury>
+      <Severity>Minor</Severity>
+      <DispatchText>House fire - a resident is coughing from a little smoke.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. House fire nearby, a resident is coughing from smoke. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Resident</Speaker><Text>I breathed a little smoke, just a bit of a cough.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Here's some oxygen - take slow breaths, you're safe now.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>All better! A little oxygen and the cough has settled.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Moderate</Severity>
+      <DispatchText>House fire - a resident is dizzy from breathing smoke.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. House fire nearby, a resident is dizzy from smoke. Please respond.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Resident</Speaker><Text>I feel dizzy... I breathed in a lot of smoke.</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Sit down here, breathe the oxygen with me - in and out.</Text></DialogueLine>
+      </AssessmentLines>
+      <TreatedText>Nice work - oxygen given and the resident feels much better.</TreatedText>
+    </Injury>
+    <Injury>
+      <Severity>Severe</Severity>
+      <DispatchText>House fire - a resident has bad smoke inhalation and needs the hospital.</DispatchText>
+      <DispatchVoiceLine>Dispatch to all units. House fire nearby, a resident has bad smoke inhalation. Please respond quickly.</DispatchVoiceLine>
+      <AssessmentLines>
+        <DialogueLine><Speaker>Resident</Speaker><Text>I... can't... breathe properly...</Text></DialogueLine>
+        <DialogueLine><Speaker>You</Speaker><Text>Stay calm, oxygen's on - the ambulance is taking you to hospital.</Text></DialogueLine>
+      </AssessmentLines>
+      <TransportedText>Great job! The resident is taken to the hospital and will be okay.</TransportedText>
+    </Injury>
+  </Injuries>
+
+  <SceneVehicleModel></SceneVehicleModel>
+  <SceneFireProp>prop_barrel_02a</SceneFireProp>
+  <PatientScenario>WORLD_HUMAN_STAND_IMPATIENT</PatientScenario>
+</CalloutConfig>

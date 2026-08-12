@@ -1,5 +1,6 @@
 using Rage.Attributes;
 using EmsMod.Core;
+using EmsMod.UI;
 using EmsMod.Utils;
 
 namespace EmsMod.Debug
@@ -27,6 +28,18 @@ namespace EmsMod.Debug
         public static void OffDuty()
         {
             Safe.Run(() => DutyManager.OffDuty(), "DutyCommands.OffDuty");
+        }
+
+        [ConsoleCommand(Name = "emsmod_reloadduty", Description = "Reload Duty.xml so newly-added uniforms/vehicles/equipment appear without a restart.")]
+        public static void ReloadDuty()
+        {
+            Safe.Run(() => Config.ConfigLoader.ReloadDuty(), "DutyCommands.ReloadDuty");
+        }
+
+        [ConsoleCommand(Name = "emsmod_wardrobe", Description = "Open/close the wardrobe: browse clothing + props (hat, glasses) live on your character.")]
+        public static void Wardrobe()
+        {
+            Safe.Run(() => WardrobeMenu.Toggle(), "DutyCommands.Wardrobe");
         }
 
         [ConsoleCommand(Name = "emsmod_duty_char", Description = "Cycle to the next character/uniform for the current mode.")]

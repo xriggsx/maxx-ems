@@ -51,10 +51,13 @@
     <Compile Include="Core\EntitySpawnRegistry.cs" />
     <Compile Include="Core\SessionStats.cs" />
     <Compile Include="Core\DutyManager.cs" />
+    <Compile Include="Core\PartnerManager.cs" />
     <Compile Include="Input\InputAction.cs" />
     <Compile Include="Input\InputBinding.cs" />
     <Compile Include="Input\InputManager.cs" />
     <Compile Include="UI\PromptUI.cs" />
+    <Compile Include="UI\DutyMenu.cs" />
+    <Compile Include="UI\WardrobeMenu.cs" />
     <Compile Include="Dialogue\DialogueEngine.cs" />
     <Compile Include="Dialogue\IDispatchVoice.cs" />
     <Compile Include="Dialogue\SystemSpeechVoice.cs" />
@@ -65,6 +68,12 @@
     <Compile Include="Callouts\PatientCalloutBase.cs" />
     <Compile Include="Callouts\CarAccident\CarAccident_Bleeding.cs" />
     <Compile Include="Callouts\BikeAccident\BikeAccident_ScrapedKnee.cs" />
+    <Compile Include="Callouts\PlaygroundFall\PlaygroundFall_TwistedAnkle.cs" />
+    <Compile Include="Callouts\SportsInjury\SportsInjury_PossibleFracture.cs" />
+    <Compile Include="Callouts\Asthma\Asthma_BreathingTrouble.cs" />
+    <Compile Include="Callouts\HouseFire\HouseFire_SmokeInhalation.cs" />
+    <Compile Include="Callouts\VehicleFire\VehicleFire_Rescue.cs" />
+    <Compile Include="Callouts\KitchenFire\KitchenFire_MinorBurn.cs" />
     <Compile Include="Config\ConfigLoader.cs" />
     <Compile Include="Config\ConfigValidator.cs" />
     <Compile Include="Config\Schema\GeneralConfig.cs" />

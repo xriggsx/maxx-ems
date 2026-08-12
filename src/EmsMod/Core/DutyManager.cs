@@ -20,7 +20,7 @@ namespace EmsMod.Core
     {
         private const string DutyOwner = "PlayerDuty";
 
-        private static DutyConfig Config => ConfigLoader.Duty;
+        public static DutyConfig Config => ConfigLoader.Duty;
 
         private static bool _onDuty;
         private static int _modeIndex;
@@ -56,9 +56,50 @@ namespace EmsMod.Core
                     TeleportToHospital(hospital);
                 }
                 SpawnCurrentVehicle();
+                GiveModeEquipment(false);
+                PartnerManager.Spawn(PartnerModelForCurrentMode());
 
                 Log.Info($"DutyManager: on duty as {CurrentMode().Name} at {(hospital != null ? hospital.Name : "current location")}.");
             }, "DutyManager.GoOnDuty");
+        }
+
+        /// <summary>Go on duty with explicit menu selections.</summary>
+        public static void GoOnDuty(int modeIndex, int charIndex, int vehIndex)
+        {
+            Safe.Run(() =>
+            {
+                if (modeIndex < 0 || modeIndex >= Config.Modes.Count)
+                {
+                    return;
+                }
+
+                _modeIndex = modeIndex;
+                DutyMode mode = Config.Modes[modeIndex];
+                _charIndex = Clamp(charIndex, mode.Characters.Count);
+                _vehIndex = Clamp(vehIndex, mode.Vehicles.Count);
+                _onDuty = true;
+                _wasDead = false;
+
+                Hospital hospital = NearestHospital();
+                ApplyCurrentCharacter();
+                if (hospital != null)
+                {
+                    TeleportToHospital(hospital);
+                }
+                SpawnCurrentVehicle();
+                GiveModeEquipment(false);
+                PartnerManager.Spawn(PartnerModelForCurrentMode());
+
+                Log.Info($"DutyManager: on duty as {mode.Name} at {(hospital != null ? hospital.Name : "current location")}.");
+            }, "DutyManager.GoOnDuty(indices)");
+        }
+
+        private static int Clamp(int index, int count)
+        {
+            if (count <= 0) { return 0; }
+            if (index < 0) { return 0; }
+            if (index >= count) { return count - 1; }
+            return index;
         }
 
         public static void OffDuty()
@@ -66,6 +107,7 @@ namespace EmsMod.Core
             Safe.Run(() =>
             {
                 EntitySpawnRegistry.CleanupOwner(DutyOwner);
+                PartnerManager.Despawn();
                 _onDuty = false;
                 Log.Info("DutyManager: off duty.");
             }, "DutyManager.OffDuty");
@@ -80,6 +122,7 @@ namespace EmsMod.Core
                 if (chars.Count == 0) { return; }
                 _charIndex = (_charIndex + 1) % chars.Count;
                 ApplyCurrentCharacter();
+                PartnerManager.Spawn(PartnerModelForCurrentMode());
                 Log.Info($"DutyManager: character -> {chars[_charIndex]}.");
             }, "DutyManager.NextCharacter");
         }
@@ -132,11 +175,30 @@ namespace EmsMod.Core
                         TeleportToHospital(hospital);
                     }
                     SpawnCurrentVehicle();
+                    GiveModeEquipment(false);
+                    PartnerManager.Spawn(PartnerModelForCurrentMode());
                 }
             }, "DutyManager.Tick");
         }
 
         private static DutyMode CurrentMode() => Config.Modes[_modeIndex];
+
+        private static string PartnerModelForCurrentMode()
+        {
+            // Partner always wears the SAME uniform as the player (their current
+            // character), so they look like a matching crew.
+            DutyMode mode = CurrentMode();
+            if (mode.Characters.Count > 0)
+            {
+                int idx = (_charIndex >= 0 && _charIndex < mode.Characters.Count) ? _charIndex : 0;
+                return mode.Characters[idx];
+            }
+            if (!string.IsNullOrWhiteSpace(mode.PartnerModel))
+            {
+                return mode.PartnerModel;
+            }
+            return "s_m_m_paramedic_01";
+        }
 
         private static int FindModeIndex(string modeName)
         {
@@ -217,6 +279,51 @@ namespace EmsMod.Core
                 var vehicle = new Vehicle(vehModel, pos, character.Heading);
                 EntitySpawnRegistry.RegisterEntity(DutyOwner, vehicle);
             }, $"DutyManager.SpawnCurrentVehicle({vehModel})");
+        }
+
+        /// <summary>Gives the current mode's tools to the player (kid-friendly
+        /// tools only, e.g. fire extinguisher / flashlight).</summary>
+        private static void GiveModeEquipment(bool equipLastAsActive)
+        {
+            List<string> equip = CurrentMode().Equipment;
+            if (equip == null || equip.Count == 0)
+            {
+                return;
+            }
+
+            Safe.Run(() =>
+            {
+                Ped ped = Game.LocalPlayer.Character;
+                for (int i = 0; i < equip.Count; i++)
+                {
+                    bool equipNow = equipLastAsActive && i == equip.Count - 1;
+                    ped.Inventory.GiveNewWeapon(new WeaponAsset(equip[i]), 4000, equipNow);
+                }
+            }, "DutyManager.GiveModeEquipment");
+        }
+
+        /// <summary>Menu hook: give and equip a specific tool from the current
+        /// mode's equipment list, so the player can grab it on the spot.</summary>
+        public static void EquipItem(int index)
+        {
+            Safe.Run(() =>
+            {
+                if (!_onDuty)
+                {
+                    Log.Info("DutyManager: not on duty.");
+                    return;
+                }
+
+                List<string> equip = CurrentMode().Equipment;
+                if (equip == null || equip.Count == 0 || index < 0 || index >= equip.Count)
+                {
+                    return;
+                }
+
+                Ped ped = Game.LocalPlayer.Character;
+                ped.Inventory.GiveNewWeapon(new WeaponAsset(equip[index]), 4000, true);
+                Log.Info($"DutyManager: equipped {equip[index]}.");
+            }, "DutyManager.EquipItem");
         }
     }
 }

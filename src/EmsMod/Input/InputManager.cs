@@ -20,6 +20,14 @@ namespace EmsMod.Input
             { InputAction.DeclineCallout, new InputBinding(Keys.N, ControllerButtons.B) },
             { InputAction.Interact, new InputBinding(Keys.E, ControllerButtons.X) },
             { InputAction.ConfirmMenuOption, new InputBinding(Keys.E, ControllerButtons.X) },
+
+            { InputAction.OpenDutyMenu, new InputBinding(Keys.F7, ControllerButtons.Back) },
+            { InputAction.MenuUp, new InputBinding(Keys.Up, ControllerButtons.DPadUp) },
+            { InputAction.MenuDown, new InputBinding(Keys.Down, ControllerButtons.DPadDown) },
+            { InputAction.MenuLeft, new InputBinding(Keys.Left, ControllerButtons.DPadLeft) },
+            { InputAction.MenuRight, new InputBinding(Keys.Right, ControllerButtons.DPadRight) },
+            { InputAction.MenuAccept, new InputBinding(Keys.Enter, ControllerButtons.A) },
+            { InputAction.MenuBack, new InputBinding(Keys.Back, ControllerButtons.B) },
         };
 
         public static bool IsActionPressed(InputAction action)

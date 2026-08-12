@@ -145,7 +145,9 @@ namespace EmsMod.Callouts
             DialogueEngine.Speak(_config.EnRouteVoiceLine);
 
             Ped player = Game.LocalPlayer.Character;
-            Vector3 ahead = player.Position + player.ForwardVector * _config.SceneSpawnDistance;
+            float spawnDistance = RandomSpawnDistance();
+            Log.Info($"{GetType().Name}: scene distance {spawnDistance:F0}m.");
+            Vector3 ahead = player.Position + player.ForwardVector * spawnDistance;
 
             // Land the scene on a proper drivable road node (with the road's
             // heading) so it's accessible and aligned to the road, not shoved
@@ -185,6 +187,52 @@ namespace EmsMod.Callouts
                     ApplyCrashedLook(_sceneVehicle);
                 }
             }
+
+            SpawnSceneFire();
+        }
+
+        /// <summary>Optional fire flavour for firefighter callouts: sets the
+        /// scene vehicle alight and/or spawns a burning prop, and makes the
+        /// player + patient fireproof so it stays kid-safe (no fail state).</summary>
+        private void SpawnSceneFire()
+        {
+            if (string.IsNullOrWhiteSpace(_config.SceneFireProp) && !_config.BurnSceneVehicle)
+            {
+                return;
+            }
+
+            Safe.Run(() =>
+            {
+                Ped player = Game.LocalPlayer.Character;
+                NativeFunction.Natives.SET_ENTITY_PROOFS(player, false, true, true, false, false, false, false, false);
+                if (_patient != null && _patient.Exists())
+                {
+                    _patient.IsInvincible = true;
+                }
+
+                EntitySpawnRegistry.RegisterCleanupAction(InstanceId, () => Safe.Run(
+                    () => NativeFunction.Natives.SET_ENTITY_PROOFS(Game.LocalPlayer.Character, false, false, false, false, false, false, false, false),
+                    $"{GetType().Name}.revert proofs"));
+
+                if (_config.BurnSceneVehicle && _sceneVehicle != null && _sceneVehicle.Exists())
+                {
+                    NativeFunction.Natives.START_ENTITY_FIRE(_sceneVehicle);
+                }
+
+                if (!string.IsNullOrWhiteSpace(_config.SceneFireProp))
+                {
+                    Vector3 firePos = _scenePosition - RightVector(_sceneHeading) * 3f;
+                    var model = new Model(_config.SceneFireProp);
+                    model.LoadAndWait();
+                    var prop = new Rage.Object(model, firePos);
+                    model.Dismiss();
+                    if (prop != null && prop.Exists())
+                    {
+                        EntitySpawnRegistry.RegisterEntity(InstanceId, prop);
+                        NativeFunction.Natives.START_ENTITY_FIRE(prop);
+                    }
+                }
+            }, $"{GetType().Name}.SpawnSceneFire");
         }
 
         protected override bool IsArrivalComplete()
@@ -707,6 +755,21 @@ namespace EmsMod.Callouts
                 near,
                 $"{GetType().Name}.next position on street");
             _sceneHeading = 0f;
+        }
+
+        /// <summary>A random scene distance (meters) for this dispatch, so
+        /// callouts vary from a short drive to a proper drive.</summary>
+        private float RandomSpawnDistance()
+        {
+            float min = _config.SceneSpawnDistanceMin;
+            float max = _config.SceneSpawnDistanceMax;
+            if (max < min)
+            {
+                float tmp = min;
+                min = max;
+                max = tmp;
+            }
+            return min + (float)Rng.NextDouble() * (max - min);
         }
 
         /// <summary>Unit vector pointing to the right of a GTA heading (degrees).</summary>

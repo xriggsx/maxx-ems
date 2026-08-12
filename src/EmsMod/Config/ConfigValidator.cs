@@ -57,6 +57,16 @@ namespace EmsMod.Config
                 config.SceneSpawnDistance = defaults.SceneSpawnDistance;
             }
 
+            if (config.SceneSpawnDistanceMin <= 0f)
+            {
+                config.SceneSpawnDistanceMin = defaults.SceneSpawnDistanceMin;
+            }
+
+            if (config.SceneSpawnDistanceMax < config.SceneSpawnDistanceMin)
+            {
+                config.SceneSpawnDistanceMax = config.SceneSpawnDistanceMin + 100f;
+            }
+
             if (config.ArrivalRadius <= 0f)
             {
                 config.ArrivalRadius = defaults.ArrivalRadius;
@@ -160,14 +170,18 @@ namespace EmsMod.Config
                 new Schema.DutyMode
                 {
                     Name = "Paramedic",
-                    Characters = new System.Collections.Generic.List<string> { "s_m_m_paramedic_01", "s_f_y_scrubs_01" },
+                    Characters = new System.Collections.Generic.List<string> { "s_m_m_paramedic_01", "s_f_y_scrubs_01", "s_m_m_doctor_01" },
                     Vehicles = new System.Collections.Generic.List<string> { "ambulance" },
+                    Equipment = new System.Collections.Generic.List<string> { "weapon_flashlight" },
+                    PartnerModel = "s_f_y_scrubs_01",
                 },
                 new Schema.DutyMode
                 {
                     Name = "Firefighter",
                     Characters = new System.Collections.Generic.List<string> { "s_m_y_fireman_01" },
                     Vehicles = new System.Collections.Generic.List<string> { "firetruk" },
+                    Equipment = new System.Collections.Generic.List<string> { "weapon_fireextinguisher", "weapon_flashlight" },
+                    PartnerModel = "s_m_y_fireman_01",
                 },
             };
         }

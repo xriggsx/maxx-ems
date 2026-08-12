@@ -68,11 +68,10 @@
   <ResolutionHoldSeconds>5</ResolutionHoldSeconds>
   <DamageSceneVehicle>true</DamageSceneVehicle>
 
-  <!-- Sitting/injured pose (looped). This clip sits the patient on the ground
-       looking a bit hurt. Loader verifies the dict exists first, so swapping in
-       a different clip is safe - if it's invalid the patient just stands. -->
-  <PatientPoseAnimDictionary>timetable@floyd@cryendcutscene@base</PatientPoseAnimDictionary>
-  <PatientPoseAnimName>cry_floyd</PatientPoseAnimName>
+  <!-- Leave empty so the pose is chosen by injury severity: Minor=stand,
+       Moderate=kneel, Severe=lie down. Set a clip here only to force one pose. -->
+  <PatientPoseAnimDictionary></PatientPoseAnimDictionary>
+  <PatientPoseAnimName></PatientPoseAnimName>
 
   <ConversationHelpText>Press E (or X on controller) to talk to the patient.</ConversationHelpText>
   <AssessmentLines>

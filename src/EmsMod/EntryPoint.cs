@@ -52,6 +52,8 @@ namespace EmsMod
             // guard above could never have fixed this - the duplicate came from
             // RPH's own scan, not a second Main() call.)
             PromptUI.Initialize();
+            DutyMenu.Initialize();
+            WardrobeMenu.Initialize();
             DialogueEngine.Initialize();
             Log.Info("Plugin loaded successfully.");
 
@@ -63,6 +65,9 @@ namespace EmsMod
                     {
                         DialogueEngine.Tick();
                         DutyManager.Tick();
+                        PartnerManager.Tick();
+                        DutyMenu.Tick();
+                        WardrobeMenu.Tick();
                         CalloutManager.Tick();
                         GameFiber.Yield();
                     }
