@@ -294,9 +294,29 @@ namespace EmsMod.Core
             Safe.Run(() =>
             {
                 Ped character = Game.LocalPlayer.Character;
-                Vector3 pos = character.Position + character.RightVector * 4f;
-                var vehicle = new Vehicle(vehModel, pos, character.Heading);
+
+                // Spawn on the nearest drivable road node, aligned to the road,
+                // so the vehicle is never blocked in and can drive straight off.
+                Vector3 near = character.Position + character.ForwardVector * 8f;
+                Vector3 pos = near;
+                float heading = character.Heading;
+
+                Safe.Run(() =>
+                {
+                    Vector3 node;
+                    float nodeHeading;
+                    bool found = NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(
+                        near.X, near.Y, near.Z, out node, out nodeHeading, 1, 3.0f, 0);
+                    if (found)
+                    {
+                        pos = node;
+                        heading = nodeHeading;
+                    }
+                }, "DutyManager.vehicle road node");
+
+                var vehicle = new Vehicle(vehModel, pos, heading) { IsPersistent = true };
                 EntitySpawnRegistry.RegisterEntity(DutyOwner, vehicle);
+                Safe.Run(() => NativeFunction.Natives.SET_VEHICLE_ON_GROUND_PROPERLY(vehicle), "DutyManager.vehicle on ground");
             }, $"DutyManager.SpawnCurrentVehicle({vehModel})");
         }
 
