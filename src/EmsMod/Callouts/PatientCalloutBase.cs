@@ -228,6 +228,7 @@ namespace EmsMod.Callouts
                     model.Dismiss();
                     if (prop != null && prop.Exists())
                     {
+                        prop.IsPersistent = true;
                         EntitySpawnRegistry.RegisterEntity(InstanceId, prop);
                         NativeFunction.Natives.START_ENTITY_FIRE(prop);
                     }
@@ -704,7 +705,7 @@ namespace EmsMod.Callouts
 
             if (!string.IsNullOrWhiteSpace(_config.ParamedicModel))
             {
-                _paramedic = SpawnPed(spawnPoint + new Vector3(2f, 0f, 0f));
+                _paramedic = SpawnPed(_config.ParamedicModel, spawnPoint + new Vector3(2f, 0f, 0f));
                 if (_paramedic != null)
                 {
                     Safe.Run(() =>

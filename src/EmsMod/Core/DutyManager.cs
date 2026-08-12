@@ -102,6 +102,22 @@ namespace EmsMod.Core
             return index;
         }
 
+        /// <summary>Re-applies the current uniform + tools (no teleport / vehicle
+        /// respawn). Used to restore the player after the wardrobe temporarily
+        /// swaps them to a freemode ped.</summary>
+        public static void ReapplyLoadout()
+        {
+            Safe.Run(() =>
+            {
+                if (!_onDuty)
+                {
+                    return;
+                }
+                ApplyCurrentCharacter();
+                GiveModeEquipment(false);
+            }, "DutyManager.ReapplyLoadout");
+        }
+
         public static void OffDuty()
         {
             Safe.Run(() =>
@@ -122,6 +138,9 @@ namespace EmsMod.Core
                 if (chars.Count == 0) { return; }
                 _charIndex = (_charIndex + 1) % chars.Count;
                 ApplyCurrentCharacter();
+                // Swapping the player model wipes the ped's inventory, so re-give
+                // the mode's tools, and rematch the partner's uniform.
+                GiveModeEquipment(false);
                 PartnerManager.Spawn(PartnerModelForCurrentMode());
                 Log.Info($"DutyManager: character -> {chars[_charIndex]}.");
             }, "DutyManager.NextCharacter");

@@ -1,6 +1,7 @@
 using System.Drawing;
 using Rage;
 using Rage.Native;
+using EmsMod.Core;
 using EmsMod.Input;
 using EmsMod.Utils;
 using RageGraphics = Rage.Graphics;
@@ -63,17 +64,35 @@ namespace EmsMod.UI
         {
             if (_visible)
             {
-                _visible = false;
+                Close();
                 return;
             }
 
             Safe.Run(() =>
             {
+                DutyMenu.ForceClose(); // only one menu open at a time
                 EnsureFreemodePed();
                 ReadCurrentFromPed();
                 _row = 0;
                 _visible = true;
             }, "WardrobeMenu.Open");
+        }
+
+        public static void ForceClose()
+        {
+            _visible = false;
+        }
+
+        /// <summary>Closes the wardrobe and, if the player is on duty, restores
+        /// their duty uniform + tools (the wardrobe swapped them to a freemode
+        /// ped, which cleared both).</summary>
+        private static void Close()
+        {
+            _visible = false;
+            if (DutyManager.OnDuty)
+            {
+                DutyManager.ReapplyLoadout();
+            }
         }
 
         public static void Tick()
@@ -90,7 +109,7 @@ namespace EmsMod.UI
         {
             if (InputManager.IsActionPressed(InputAction.MenuBack))
             {
-                _visible = false;
+                Close();
                 return;
             }
 
@@ -107,7 +126,7 @@ namespace EmsMod.UI
             {
                 if (InputManager.IsActionPressed(InputAction.MenuAccept))
                 {
-                    _visible = false;
+                    Close();
                 }
                 return;
             }

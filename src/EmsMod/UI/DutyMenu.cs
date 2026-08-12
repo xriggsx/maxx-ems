@@ -45,6 +45,11 @@ namespace EmsMod.UI
             _initialized = true;
         }
 
+        public static void ForceClose()
+        {
+            _visible = false;
+        }
+
         public static void Tick()
         {
             if (InputManager.IsActionPressed(InputAction.OpenDutyMenu))
@@ -52,6 +57,7 @@ namespace EmsMod.UI
                 _visible = !_visible;
                 if (_visible)
                 {
+                    WardrobeMenu.ForceClose(); // only one menu open at a time
                     _row = 0;
                     ClampSelections();
                 }

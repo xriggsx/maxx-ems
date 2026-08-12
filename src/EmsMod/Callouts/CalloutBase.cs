@@ -131,13 +131,34 @@ namespace EmsMod.Callouts
         {
             var ped = new Ped(position, heading)
             {
-                BlockPermanentEvents = true
+                BlockPermanentEvents = true,
+                // Persistent so the ped isn't streamed out when spawned far from
+                // the player (scenes can be up to a few hundred metres away).
+                IsPersistent = true
             };
             ped.Tasks.ClearImmediately();
             ped.Tasks.StandStill(-1);
 
             EntitySpawnRegistry.RegisterEntity(InstanceId, ped);
             return ped;
+        }
+
+        /// <summary>Spawns a ped of a specific model (e.g. a paramedic), registered
+        /// for cleanup. Returns null (logged) if the model fails to load.</summary>
+        protected Ped SpawnPed(string modelName, Vector3 position, float heading = 0f)
+        {
+            return Safe.Run(() =>
+            {
+                var ped = new Ped(modelName, position, heading)
+                {
+                    BlockPermanentEvents = true,
+                    IsPersistent = true
+                };
+                ped.Tasks.ClearImmediately();
+                ped.Tasks.StandStill(-1);
+                EntitySpawnRegistry.RegisterEntity(InstanceId, ped);
+                return ped;
+            }, null, $"CalloutBase.SpawnPed({modelName}) [{GetType().Name}]");
         }
 
         /// <summary>Spawns a vehicle registered for automatic cleanup. Returns
@@ -147,7 +168,12 @@ namespace EmsMod.Callouts
         {
             return Safe.Run(() =>
             {
-                var vehicle = new Vehicle(model, position, heading);
+                var vehicle = new Vehicle(model, position, heading)
+                {
+                    // Persistent so far-away scene vehicles aren't streamed out
+                    // before the player arrives.
+                    IsPersistent = true
+                };
                 EntitySpawnRegistry.RegisterEntity(InstanceId, vehicle);
                 return vehicle;
             }, null, $"CalloutBase.SpawnVehicle({model}) [{GetType().Name}]");
