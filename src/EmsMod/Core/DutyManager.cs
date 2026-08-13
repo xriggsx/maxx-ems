@@ -50,14 +50,14 @@ namespace EmsMod.Core
                 _wasDead = false;
 
                 Hospital hospital = NearestHospital();
-                ApplyCurrentCharacter();
+                ApplyCurrentUniform();
                 if (hospital != null)
                 {
                     TeleportToHospital(hospital);
                 }
                 SpawnCurrentVehicle();
                 GiveModeEquipment(false);
-                PartnerManager.Spawn(PartnerModelForCurrentMode());
+                SpawnMatchingPartner();
 
                 Log.Info($"DutyManager: on duty as {CurrentMode().Name} at {(hospital != null ? hospital.Name : "current location")}.");
             }, "DutyManager.GoOnDuty");
@@ -75,20 +75,20 @@ namespace EmsMod.Core
 
                 _modeIndex = modeIndex;
                 DutyMode mode = Config.Modes[modeIndex];
-                _charIndex = Clamp(charIndex, mode.Characters.Count);
+                _charIndex = Clamp(charIndex, UniformCount(modeIndex));
                 _vehIndex = Clamp(vehIndex, mode.Vehicles.Count);
                 _onDuty = true;
                 _wasDead = false;
 
                 Hospital hospital = NearestHospital();
-                ApplyCurrentCharacter();
+                ApplyCurrentUniform();
                 if (hospital != null)
                 {
                     TeleportToHospital(hospital);
                 }
                 SpawnCurrentVehicle();
                 GiveModeEquipment(false);
-                PartnerManager.Spawn(PartnerModelForCurrentMode());
+                SpawnMatchingPartner();
 
                 Log.Info($"DutyManager: on duty as {mode.Name} at {(hospital != null ? hospital.Name : "current location")}.");
             }, "DutyManager.GoOnDuty(indices)");
@@ -113,7 +113,7 @@ namespace EmsMod.Core
                 {
                     return;
                 }
-                ApplyCurrentCharacter();
+                ApplyCurrentUniform();
                 GiveModeEquipment(false);
             }, "DutyManager.ReapplyLoadout");
         }
@@ -134,15 +134,15 @@ namespace EmsMod.Core
             Safe.Run(() =>
             {
                 if (!_onDuty) { Log.Info("DutyManager: not on duty."); return; }
-                List<string> chars = CurrentMode().Characters;
-                if (chars.Count == 0) { return; }
-                _charIndex = (_charIndex + 1) % chars.Count;
-                ApplyCurrentCharacter();
+                int uCount = UniformCount(_modeIndex);
+                if (uCount == 0) { return; }
+                _charIndex = (_charIndex + 1) % uCount;
+                ApplyCurrentUniform();
                 // Swapping the player model wipes the ped's inventory, so re-give
                 // the mode's tools, and rematch the partner's uniform.
                 GiveModeEquipment(false);
-                PartnerManager.Spawn(PartnerModelForCurrentMode());
-                Log.Info($"DutyManager: character -> {chars[_charIndex]}.");
+                SpawnMatchingPartner();
+                Log.Info($"DutyManager: uniform -> {UniformName(_modeIndex, _charIndex)}.");
             }, "DutyManager.NextCharacter");
         }
 
@@ -188,14 +188,14 @@ namespace EmsMod.Core
                     _wasDead = false;
                     Log.Info("DutyManager: player respawning at nearest hospital.");
                     Hospital hospital = NearestHospital();
-                    ApplyCurrentCharacter();
+                    ApplyCurrentUniform();
                     if (hospital != null)
                     {
                         TeleportToHospital(hospital);
                     }
                     SpawnCurrentVehicle();
                     GiveModeEquipment(false);
-                    PartnerManager.Spawn(PartnerModelForCurrentMode());
+                    SpawnMatchingPartner();
                 }
             }, "DutyManager.Tick");
         }
@@ -204,19 +204,16 @@ namespace EmsMod.Core
 
         private static string PartnerModelForCurrentMode()
         {
-            // Partner always wears the SAME uniform as the player (their current
-            // character), so they look like a matching crew.
+            // Partner matches the player's uniform. For a character uniform that's
+            // the ped model; for a saved outfit it's a freemode ped (the outfit
+            // pieces are applied to the partner right after spawn).
             DutyMode mode = CurrentMode();
-            if (mode.Characters.Count > 0)
+            int charCount = mode.Characters.Count;
+            if (_charIndex < charCount && charCount > 0)
             {
-                int idx = (_charIndex >= 0 && _charIndex < mode.Characters.Count) ? _charIndex : 0;
-                return mode.Characters[idx];
+                return mode.Characters[_charIndex];
             }
-            if (!string.IsNullOrWhiteSpace(mode.PartnerModel))
-            {
-                return mode.PartnerModel;
-            }
-            return "s_m_m_paramedic_01";
+            return "mp_m_freemode_01";
         }
 
         private static int FindModeIndex(string modeName)
@@ -260,15 +257,57 @@ namespace EmsMod.Core
             }, "DutyManager.TeleportToHospital");
         }
 
-        private static void ApplyCurrentCharacter()
+        // The uniform list per mode = ped-model characters, then saved wardrobe
+        // outfits (which show for every mode). _charIndex spans this combined list.
+        public static int UniformCount(int modeIndex)
         {
-            List<string> chars = CurrentMode().Characters;
-            if (chars.Count == 0)
+            if (modeIndex < 0 || modeIndex >= Config.Modes.Count)
             {
+                return 0;
+            }
+            return Config.Modes[modeIndex].Characters.Count + OutfitStore.Outfits.Count;
+        }
+
+        public static string UniformName(int modeIndex, int index)
+        {
+            if (modeIndex < 0 || modeIndex >= Config.Modes.Count)
+            {
+                return "(none)";
+            }
+            DutyMode mode = Config.Modes[modeIndex];
+            if (index >= 0 && index < mode.Characters.Count)
+            {
+                return mode.Characters[index];
+            }
+            int oi = index - mode.Characters.Count;
+            List<Outfit> outfits = OutfitStore.Outfits;
+            return (oi >= 0 && oi < outfits.Count) ? outfits[oi].Name : "(none)";
+        }
+
+        private static void ApplyCurrentUniform()
+        {
+            DutyMode mode = CurrentMode();
+            int charCount = mode.Characters.Count;
+
+            if (_charIndex < charCount)
+            {
+                if (charCount == 0) { return; }
+                ApplyPlayerModel(mode.Characters[_charIndex]);
                 return;
             }
 
-            string modelName = chars[_charIndex];
+            // A saved wardrobe outfit: freemode ped + the saved pieces.
+            int oi = _charIndex - charCount;
+            List<Outfit> outfits = OutfitStore.Outfits;
+            if (oi >= 0 && oi < outfits.Count)
+            {
+                ApplyPlayerModel("mp_m_freemode_01");
+                OutfitStore.Apply(Game.LocalPlayer.Character, outfits[oi]);
+            }
+        }
+
+        private static void ApplyPlayerModel(string modelName)
+        {
             Safe.Run(() =>
             {
                 var model = new Model(modelName);
@@ -276,7 +315,31 @@ namespace EmsMod.Core
                 NativeFunction.Natives.SET_PLAYER_MODEL(Game.LocalPlayer, model.Hash);
                 NativeFunction.Natives.SET_PED_DEFAULT_COMPONENT_VARIATION(Game.LocalPlayer.Character);
                 model.Dismiss();
-            }, $"DutyManager.ApplyCurrentCharacter({modelName})");
+            }, $"DutyManager.ApplyPlayerModel({modelName})");
+        }
+
+        private static Outfit CurrentOutfitOrNull()
+        {
+            int charCount = CurrentMode().Characters.Count;
+            if (_charIndex < charCount)
+            {
+                return null;
+            }
+            int oi = _charIndex - charCount;
+            List<Outfit> outfits = OutfitStore.Outfits;
+            return (oi >= 0 && oi < outfits.Count) ? outfits[oi] : null;
+        }
+
+        // Spawn the partner matching the player's uniform (character model, or a
+        // freemode ped wearing the same saved outfit).
+        private static void SpawnMatchingPartner()
+        {
+            SpawnMatchingPartner();
+            Outfit outfit = CurrentOutfitOrNull();
+            if (outfit != null)
+            {
+                PartnerManager.ApplyOutfit(outfit);
+            }
         }
 
         private static void SpawnCurrentVehicle()

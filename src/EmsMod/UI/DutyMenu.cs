@@ -122,10 +122,10 @@ namespace EmsMod.UI
                     break;
 
                 case RowCharacter:
-                    int charCount = modes[_mode].Characters.Count;
-                    if (charCount > 0)
+                    int uniformCount = DutyManager.UniformCount(_mode);
+                    if (uniformCount > 0)
                     {
-                        _char = (_char + dir + charCount) % charCount;
+                        _char = (_char + dir + uniformCount) % uniformCount;
                     }
                     break;
 
@@ -178,7 +178,7 @@ namespace EmsMod.UI
             }
 
             if (_mode >= modes.Count) { _mode = 0; }
-            if (_char >= modes[_mode].Characters.Count) { _char = 0; }
+            if (_char >= DutyManager.UniformCount(_mode)) { _char = 0; }
             if (_veh >= modes[_mode].Vehicles.Count) { _veh = 0; }
             if (_equip >= modes[_mode].Equipment.Count) { _equip = 0; }
         }
@@ -211,7 +211,7 @@ namespace EmsMod.UI
             g.DrawText("EMS - Go On Duty", "Arial", 22f, new PointF(x + 16f, y + 12f), Color.White);
 
             string modeName = modes.Count > 0 ? modes[_mode].Name : "(none)";
-            string charName = (modes.Count > 0 && modes[_mode].Characters.Count > 0) ? modes[_mode].Characters[_char] : "(none)";
+            string charName = DutyManager.UniformName(_mode, _char);
             string vehName = (modes.Count > 0 && modes[_mode].Vehicles.Count > 0) ? modes[_mode].Vehicles[_veh] : "(none)";
             string equipName = (modes.Count > 0 && modes[_mode].Equipment.Count > 0) ? modes[_mode].Equipment[_equip] : "(none)";
 

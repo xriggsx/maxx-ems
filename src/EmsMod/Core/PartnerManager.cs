@@ -1,5 +1,6 @@
 using Rage;
 using Rage.Native;
+using EmsMod.Config.Schema;
 using EmsMod.Utils;
 
 namespace EmsMod.Core
@@ -49,6 +50,17 @@ namespace EmsMod.Core
                 IssueFollow();
                 _mode = ModeFollowing;
             }, "PartnerManager.Spawn");
+        }
+
+        /// <summary>Dress the partner in a saved outfit (after spawning them as a
+        /// freemode ped) so they match a player wearing that outfit.</summary>
+        public static void ApplyOutfit(Outfit outfit)
+        {
+            if (_partner == null || !_partner.Exists())
+            {
+                return;
+            }
+            OutfitStore.Apply(_partner, outfit);
         }
 
         public static void Despawn()

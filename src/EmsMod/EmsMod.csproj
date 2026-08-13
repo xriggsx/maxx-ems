@@ -52,6 +52,7 @@
     <Compile Include="Core\SessionStats.cs" />
     <Compile Include="Core\DutyManager.cs" />
     <Compile Include="Core\PartnerManager.cs" />
+    <Compile Include="Core\OutfitStore.cs" />
     <Compile Include="Input\InputAction.cs" />
     <Compile Include="Input\InputBinding.cs" />
     <Compile Include="Input\InputManager.cs" />
@@ -81,6 +82,7 @@
     <Compile Include="Config\Schema\DialogueLine.cs" />
     <Compile Include="Config\Schema\Injury.cs" />
     <Compile Include="Config\Schema\DutyConfig.cs" />
+    <Compile Include="Config\Schema\Outfit.cs" />
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\ModPaths.cs" />
     <Compile Include="Utils\Safe.cs" />

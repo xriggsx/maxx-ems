@@ -42,6 +42,12 @@ namespace EmsMod.Debug
             Safe.Run(() => WardrobeMenu.Toggle(), "DutyCommands.Wardrobe");
         }
 
+        [ConsoleCommand(Name = "emsmod_saveoutfit", Description = "Save your current look as a named uniform (shows in the Duty menu). Usage: emsmod_saveoutfit <name>")]
+        public static void SaveOutfit(string name)
+        {
+            Safe.Run(() => WardrobeMenu.SaveCurrentAs(name), "DutyCommands.SaveOutfit");
+        }
+
         [ConsoleCommand(Name = "emsmod_duty_char", Description = "Cycle to the next character/uniform for the current mode.")]
         public static void NextCharacter()
         {

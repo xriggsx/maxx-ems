@@ -1,6 +1,7 @@
 using System.Drawing;
 using Rage;
 using Rage.Native;
+using EmsMod.Config.Schema;
 using EmsMod.Core;
 using EmsMod.Input;
 using EmsMod.Utils;
@@ -44,10 +45,11 @@ namespace EmsMod.UI
 
         private static bool _initialized;
         private static bool _visible;
-        private static int _row; // 0..Labels.Length-1 = slots; then Exit row
+        private static int _row; // 0..Labels.Length-1 = slots; then Save, Exit
 
-        private static int RowCount => Labels.Length + 1; // + Exit
-        private static int ExitRow => Labels.Length;
+        private static int RowCount => Labels.Length + 2; // + Save + Exit
+        private static int SaveRow => Labels.Length;
+        private static int ExitRow => Labels.Length + 1;
 
         public static void Initialize()
         {
@@ -122,6 +124,15 @@ namespace EmsMod.UI
                 _row = (_row + 1) % RowCount;
             }
 
+            if (_row == SaveRow)
+            {
+                if (InputManager.IsActionPressed(InputAction.MenuAccept))
+                {
+                    SaveCurrentOutfit();
+                }
+                return;
+            }
+
             if (_row == ExitRow)
             {
                 if (InputManager.IsActionPressed(InputAction.MenuAccept))
@@ -143,6 +154,42 @@ namespace EmsMod.UI
             {
                 ChangeTexture(1);
             }
+        }
+
+        private static Outfit BuildOutfit(string name)
+        {
+            var outfit = new Outfit { Name = name };
+            for (int i = 0; i < Labels.Length; i++)
+            {
+                outfit.Pieces.Add(new OutfitPiece
+                {
+                    IsProp = IsProp[i],
+                    Id = Ids[i],
+                    Drawable = Drawable[i],
+                    Texture = Texture[i]
+                });
+            }
+            return outfit;
+        }
+
+        private static void SaveCurrentOutfit()
+        {
+            string name = $"Outfit {OutfitStore.Outfits.Count + 1}";
+            OutfitStore.Add(BuildOutfit(name));
+            Safe.Run(() => Game.DisplayNotification($"Saved as ~b~{name}~s~. Pick it in the Duty menu (F7) under Uniform."), "WardrobeMenu.saveNotify");
+        }
+
+        /// <summary>Console-command entry: save the player's current look as a
+        /// named outfit (reads the current ped, no need to open the wardrobe).</summary>
+        public static void SaveCurrentAs(string name)
+        {
+            Safe.Run(() =>
+            {
+                ReadCurrentFromPed();
+                string finalName = string.IsNullOrWhiteSpace(name) ? $"Outfit {OutfitStore.Outfits.Count + 1}" : name.Trim();
+                OutfitStore.Add(BuildOutfit(finalName));
+                Game.DisplayNotification($"Saved as ~b~{finalName}~s~. Pick it in the Duty menu (F7) under Uniform.");
+            }, "WardrobeMenu.SaveCurrentAs");
         }
 
         private static Ped Player => Game.LocalPlayer.Character;
@@ -276,9 +323,10 @@ namespace EmsMod.UI
                 DrawRow(g, x, y + headerHeight + i * rowHeight, rowHeight, width, i, $"{Labels[i]}:  < {val} >");
             }
 
+            DrawRow(g, x, y + headerHeight + SaveRow * rowHeight, rowHeight, width, SaveRow, "Save Outfit  (adds it to the Duty menu)");
             DrawRow(g, x, y + headerHeight + ExitRow * rowHeight, rowHeight, width, ExitRow, "Exit Wardrobe");
 
-            g.DrawText("Up/Down slot   Left/Right change   Enter/A texture   Backspace/B close",
+            g.DrawText("Up/Down slot   Left/Right change   Enter/A texture or select   Backspace/B close",
                 "Arial", 12f, new PointF(x + 16f, y + height - 20f), Color.LightGray);
         }
 
