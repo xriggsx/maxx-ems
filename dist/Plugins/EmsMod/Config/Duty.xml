@@ -24,16 +24,10 @@
            or add-on model names for different vehicles - no replacing. -->
       <Vehicles>
         <DutyVehicle><Model>ambulance</Model><Livery>-1</Livery><Name>Ambulance (NSW)</Name></DutyVehicle>
-        <DutyVehicle><Model>f750</Model><Livery>0</Livery><Name>F750 Ambulance (Livery 1)</Name></DutyVehicle>
-        <DutyVehicle><Model>f750</Model><Livery>1</Livery><Name>F750 Ambulance (Livery 2)</Name></DutyVehicle>
-        <DutyVehicle><Model>f750</Model><Livery>2</Livery><Name>F750 Ambulance (Livery 3)</Name></DutyVehicle>
-        <DutyVehicle><Model>f750</Model><Livery>3</Livery><Name>F750 Ambulance (Livery 4)</Name></DutyVehicle>
-        <DutyVehicle><Model>f750</Model><Livery>4</Livery><Name>F750 Ambulance (Livery 5)</Name></DutyVehicle>
-        <DutyVehicle><Model>exp</Model><Livery>0</Livery><Name>EMS SUV (Livery 1)</Name></DutyVehicle>
-        <DutyVehicle><Model>exp</Model><Livery>1</Livery><Name>EMS SUV (Livery 2)</Name></DutyVehicle>
-        <DutyVehicle><Model>exp</Model><Livery>2</Livery><Name>EMS SUV (Livery 3)</Name></DutyVehicle>
-        <DutyVehicle><Model>exp</Model><Livery>3</Livery><Name>EMS SUV (Livery 4)</Name></DutyVehicle>
-        <DutyVehicle><Model>exp</Model><Livery>4</Livery><Name>EMS SUV (Livery 5)</Name></DutyVehicle>
+        <!-- Add-on ambulances re-add here once the dlcpacks load without crashing:
+        <DutyVehicle><Model>f750</Model><Livery>0</Livery><Name>F750 Ambulance</Name></DutyVehicle>
+        <DutyVehicle><Model>exp</Model><Livery>0</Livery><Name>EMS SUV</Name></DutyVehicle>
+        -->
       </Vehicles>
       <Equipment>
         <string>weapon_flashlight</string>
@@ -47,9 +41,9 @@
       </Characters>
       <Vehicles>
         <DutyVehicle><Model>firetruk</Model><Livery>-1</Livery><Name>Fire Truck (NSW)</Name></DutyVehicle>
+        <!-- Add-on fire trucks re-add here once the dlcpacks load without crashing:
         <DutyVehicle><Model>ferrara</Model><Livery>-1</Livery><Name>Ferrara Fire Truck</Name></DutyVehicle>
-        <DutyVehicle><Model>ferrara</Model><Livery>1</Livery><Name>Ferrara (Livery 2)</Name></DutyVehicle>
-        <DutyVehicle><Model>ferrara</Model><Livery>2</Livery><Name>Ferrara (Livery 3)</Name></DutyVehicle>
+        -->
       </Vehicles>
       <Equipment>
         <string>weapon_fireextinguisher</string>
