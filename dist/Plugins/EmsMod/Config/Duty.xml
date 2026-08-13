@@ -23,7 +23,12 @@
            Add the same model with different Livery numbers for state variants,
            or add-on model names for different vehicles - no replacing. -->
       <Vehicles>
-        <DutyVehicle><Model>ambulance</Model><Livery>-1</Livery><Name>Ambulance</Name></DutyVehicle>
+        <DutyVehicle><Model>ambulance</Model><Livery>-1</Livery><Name>Ambulance (NSW)</Name></DutyVehicle>
+        <DutyVehicle><Model>f750</Model><Livery>0</Livery><Name>F750 Ambulance (Livery 1)</Name></DutyVehicle>
+        <DutyVehicle><Model>f750</Model><Livery>1</Livery><Name>F750 Ambulance (Livery 2)</Name></DutyVehicle>
+        <DutyVehicle><Model>f750</Model><Livery>2</Livery><Name>F750 Ambulance (Livery 3)</Name></DutyVehicle>
+        <DutyVehicle><Model>f750</Model><Livery>3</Livery><Name>F750 Ambulance (Livery 4)</Name></DutyVehicle>
+        <DutyVehicle><Model>f750</Model><Livery>4</Livery><Name>F750 Ambulance (Livery 5)</Name></DutyVehicle>
       </Vehicles>
       <Equipment>
         <string>weapon_flashlight</string>
