@@ -29,6 +29,11 @@
         <DutyVehicle><Model>f750</Model><Livery>2</Livery><Name>F750 Ambulance (Livery 3)</Name></DutyVehicle>
         <DutyVehicle><Model>f750</Model><Livery>3</Livery><Name>F750 Ambulance (Livery 4)</Name></DutyVehicle>
         <DutyVehicle><Model>f750</Model><Livery>4</Livery><Name>F750 Ambulance (Livery 5)</Name></DutyVehicle>
+        <DutyVehicle><Model>exp</Model><Livery>0</Livery><Name>EMS SUV (Livery 1)</Name></DutyVehicle>
+        <DutyVehicle><Model>exp</Model><Livery>1</Livery><Name>EMS SUV (Livery 2)</Name></DutyVehicle>
+        <DutyVehicle><Model>exp</Model><Livery>2</Livery><Name>EMS SUV (Livery 3)</Name></DutyVehicle>
+        <DutyVehicle><Model>exp</Model><Livery>3</Livery><Name>EMS SUV (Livery 4)</Name></DutyVehicle>
+        <DutyVehicle><Model>exp</Model><Livery>4</Livery><Name>EMS SUV (Livery 5)</Name></DutyVehicle>
       </Vehicles>
       <Equipment>
         <string>weapon_flashlight</string>
