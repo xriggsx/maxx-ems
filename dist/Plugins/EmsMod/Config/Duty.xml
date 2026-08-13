@@ -36,7 +36,10 @@
         <string>s_m_y_fireman_01</string>
       </Characters>
       <Vehicles>
-        <DutyVehicle><Model>firetruk</Model><Livery>-1</Livery><Name>Fire Truck</Name></DutyVehicle>
+        <DutyVehicle><Model>firetruk</Model><Livery>-1</Livery><Name>Fire Truck (NSW)</Name></DutyVehicle>
+        <DutyVehicle><Model>ferrara</Model><Livery>-1</Livery><Name>Ferrara Fire Truck</Name></DutyVehicle>
+        <DutyVehicle><Model>ferrara</Model><Livery>1</Livery><Name>Ferrara (Livery 2)</Name></DutyVehicle>
+        <DutyVehicle><Model>ferrara</Model><Livery>2</Livery><Name>Ferrara (Livery 3)</Name></DutyVehicle>
       </Vehicles>
       <Equipment>
         <string>weapon_fireextinguisher</string>
