@@ -212,7 +212,7 @@ namespace EmsMod.UI
 
             string modeName = modes.Count > 0 ? modes[_mode].Name : "(none)";
             string charName = DutyManager.UniformName(_mode, _char);
-            string vehName = (modes.Count > 0 && modes[_mode].Vehicles.Count > 0) ? modes[_mode].Vehicles[_veh] : "(none)";
+            string vehName = DutyManager.VehicleName(_mode, _veh);
             string equipName = (modes.Count > 0 && modes[_mode].Equipment.Count > 0) ? modes[_mode].Equipment[_equip] : "(none)";
 
             DrawRow(g, x, y + headerHeight, rowHeight, RowMode, $"Mode:  < {modeName} >");

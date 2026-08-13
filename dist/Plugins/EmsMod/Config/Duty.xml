@@ -19,8 +19,11 @@
         <string>s_f_y_scrubs_01</string>
         <string>s_m_m_doctor_01</string>
       </Characters>
+      <!-- Each vehicle = a Model + optional Livery (-1 = default) + display Name.
+           Add the same model with different Livery numbers for state variants,
+           or add-on model names for different vehicles - no replacing. -->
       <Vehicles>
-        <string>ambulance</string>
+        <DutyVehicle><Model>ambulance</Model><Livery>-1</Livery><Name>Ambulance</Name></DutyVehicle>
       </Vehicles>
       <Equipment>
         <string>weapon_flashlight</string>
@@ -33,7 +36,7 @@
         <string>s_m_y_fireman_01</string>
       </Characters>
       <Vehicles>
-        <string>firetruk</string>
+        <DutyVehicle><Model>firetruk</Model><Livery>-1</Livery><Name>Fire Truck</Name></DutyVehicle>
       </Vehicles>
       <Equipment>
         <string>weapon_fireextinguisher</string>

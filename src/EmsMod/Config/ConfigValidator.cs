@@ -171,7 +171,7 @@ namespace EmsMod.Config
                 {
                     Name = "Paramedic",
                     Characters = new System.Collections.Generic.List<string> { "s_m_m_paramedic_01", "s_f_y_scrubs_01", "s_m_m_doctor_01" },
-                    Vehicles = new System.Collections.Generic.List<string> { "ambulance" },
+                    Vehicles = new System.Collections.Generic.List<Schema.DutyVehicle> { new Schema.DutyVehicle { Model = "ambulance", Name = "Ambulance" } },
                     Equipment = new System.Collections.Generic.List<string> { "weapon_flashlight" },
                     PartnerModel = "s_f_y_scrubs_01",
                 },
@@ -179,7 +179,7 @@ namespace EmsMod.Config
                 {
                     Name = "Firefighter",
                     Characters = new System.Collections.Generic.List<string> { "s_m_y_fireman_01" },
-                    Vehicles = new System.Collections.Generic.List<string> { "firetruk" },
+                    Vehicles = new System.Collections.Generic.List<Schema.DutyVehicle> { new Schema.DutyVehicle { Model = "firetruk", Name = "Fire Truck" } },
                     Equipment = new System.Collections.Generic.List<string> { "weapon_fireextinguisher", "weapon_flashlight" },
                     PartnerModel = "s_m_y_fireman_01",
                 },

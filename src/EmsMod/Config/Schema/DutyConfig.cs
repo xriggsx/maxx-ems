@@ -23,6 +23,15 @@ namespace EmsMod.Config.Schema
         public float Heading { get; set; }
     }
 
+    public class DutyVehicle
+    {
+        public string Model { get; set; } = "";
+        // Livery index to apply, or -1 for the vehicle's default paint.
+        public int Livery { get; set; } = -1;
+        // Menu display name; falls back to Model if empty.
+        public string Name { get; set; } = "";
+    }
+
     public class DutyMode
     {
         // "Paramedic" / "Firefighter".
@@ -31,8 +40,10 @@ namespace EmsMod.Config.Schema
         // Ped model names - each is a "character + uniform" for MVP (model swap).
         public List<string> Characters { get; set; } = new List<string>();
 
-        // Response vehicle model names for this mode.
-        public List<string> Vehicles { get; set; } = new List<string>();
+        // Response vehicles for this mode. Each is a model + optional livery, so
+        // one model can appear several times as different paint schemes (e.g.
+        // NSW / Victorian / QLD) without replacing anything.
+        public List<DutyVehicle> Vehicles { get; set; } = new List<DutyVehicle>();
 
         // Usable tools given on duty and browsable in the menu (weapon-slot
         // TOOLS only - fire extinguisher, flashlight - never violent weapons).

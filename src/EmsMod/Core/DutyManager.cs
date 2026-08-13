@@ -151,11 +151,11 @@ namespace EmsMod.Core
             Safe.Run(() =>
             {
                 if (!_onDuty) { Log.Info("DutyManager: not on duty."); return; }
-                List<string> vehs = CurrentMode().Vehicles;
+                List<DutyVehicle> vehs = CurrentMode().Vehicles;
                 if (vehs.Count == 0) { return; }
                 _vehIndex = (_vehIndex + 1) % vehs.Count;
                 SpawnCurrentVehicle();
-                Log.Info($"DutyManager: vehicle -> {vehs[_vehIndex]}.");
+                Log.Info($"DutyManager: vehicle -> {VehicleName(_modeIndex, _vehIndex)}.");
             }, "DutyManager.NextVehicle");
         }
 
@@ -344,7 +344,7 @@ namespace EmsMod.Core
 
         private static void SpawnCurrentVehicle()
         {
-            List<string> vehs = CurrentMode().Vehicles;
+            List<DutyVehicle> vehs = CurrentMode().Vehicles;
             if (vehs.Count == 0)
             {
                 return;
@@ -353,7 +353,8 @@ namespace EmsMod.Core
             // Replace any existing duty vehicle.
             EntitySpawnRegistry.CleanupOwner(DutyOwner);
 
-            string vehModel = vehs[_vehIndex];
+            DutyVehicle veh = vehs[Clamp(_vehIndex, vehs.Count)];
+            string vehModel = veh.Model;
             Safe.Run(() =>
             {
                 Ped character = Game.LocalPlayer.Character;
@@ -379,8 +380,36 @@ namespace EmsMod.Core
 
                 var vehicle = new Vehicle(vehModel, pos, heading) { IsPersistent = true };
                 EntitySpawnRegistry.RegisterEntity(DutyOwner, vehicle);
+                if (veh.Livery >= 0)
+                {
+                    Safe.Run(() => NativeFunction.Natives.SET_VEHICLE_LIVERY(vehicle, veh.Livery), "DutyManager.vehicle livery");
+                }
                 Safe.Run(() => NativeFunction.Natives.SET_VEHICLE_ON_GROUND_PROPERLY(vehicle), "DutyManager.vehicle on ground");
             }, $"DutyManager.SpawnCurrentVehicle({vehModel})");
+        }
+
+        public static int VehicleCount(int modeIndex)
+        {
+            if (modeIndex < 0 || modeIndex >= Config.Modes.Count)
+            {
+                return 0;
+            }
+            return Config.Modes[modeIndex].Vehicles.Count;
+        }
+
+        public static string VehicleName(int modeIndex, int index)
+        {
+            if (modeIndex < 0 || modeIndex >= Config.Modes.Count)
+            {
+                return "(none)";
+            }
+            List<DutyVehicle> vehs = Config.Modes[modeIndex].Vehicles;
+            if (index < 0 || index >= vehs.Count)
+            {
+                return "(none)";
+            }
+            DutyVehicle v = vehs[index];
+            return string.IsNullOrWhiteSpace(v.Name) ? v.Model : v.Name;
         }
 
         /// <summary>Gives the current mode's tools to the player (kid-friendly
