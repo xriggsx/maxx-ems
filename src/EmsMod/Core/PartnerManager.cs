@@ -32,23 +32,36 @@ namespace EmsMod.Core
                 Ped player = Game.LocalPlayer.Character;
                 Vector3 pos = player.Position - player.RightVector * 2f;
 
+                Log.Info($"Partner: validating model {modelName}");
                 var model = new Model(modelName);
+                if (!model.IsValid)
+                {
+                    Log.Warn($"Partner: model '{modelName}' is invalid; skipping partner.");
+                    return;
+                }
+
+                Log.Info("Partner: loading model");
                 model.LoadAndWait();
+                Log.Info("Partner: creating ped");
                 _partner = new Ped(model, pos, player.Heading);
                 model.Dismiss();
 
                 if (_partner == null || !_partner.Exists())
                 {
+                    Log.Warn("Partner: ped failed to create.");
                     return;
                 }
 
+                Log.Info("Partner: setting flags");
                 _partner.BlockPermanentEvents = true;
                 _partner.IsInvincible = true;
                 EntitySpawnRegistry.RegisterEntity(Owner, _partner);
 
                 _mode = ModeNone;
+                Log.Info("Partner: issuing follow");
                 IssueFollow();
                 _mode = ModeFollowing;
+                Log.Info("Partner: done");
             }, "PartnerManager.Spawn");
         }
 

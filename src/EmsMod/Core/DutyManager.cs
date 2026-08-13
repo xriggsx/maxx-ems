@@ -50,14 +50,20 @@ namespace EmsMod.Core
                 _wasDead = false;
 
                 Hospital hospital = NearestHospital();
+                Log.Info("GoOnDuty step: apply uniform");
                 ApplyCurrentUniform();
+                Log.Info("GoOnDuty step: teleport");
                 if (hospital != null)
                 {
                     TeleportToHospital(hospital);
                 }
+                Log.Info("GoOnDuty step: spawn vehicle");
                 SpawnCurrentVehicle();
+                Log.Info("GoOnDuty step: equipment");
                 GiveModeEquipment(false);
+                Log.Info("GoOnDuty step: partner");
                 SpawnMatchingPartner();
+                Log.Info("GoOnDuty step: done");
 
                 Log.Info($"DutyManager: on duty as {CurrentMode().Name} at {(hospital != null ? hospital.Name : "current location")}.");
             }, "DutyManager.GoOnDuty");
@@ -334,7 +340,11 @@ namespace EmsMod.Core
         // freemode ped wearing the same saved outfit).
         private static void SpawnMatchingPartner()
         {
-            SpawnMatchingPartner();
+            if (!Config.EnablePartner)
+            {
+                return;
+            }
+            PartnerManager.Spawn(PartnerModelForCurrentMode());
             Outfit outfit = CurrentOutfitOrNull();
             if (outfit != null)
             {
@@ -365,6 +375,7 @@ namespace EmsMod.Core
                 Vector3 pos = near;
                 float heading = character.Heading;
 
+                Log.Info($"SpawnVehicle: model={vehModel} - finding road node");
                 Safe.Run(() =>
                 {
                     Vector3 node;
@@ -378,13 +389,16 @@ namespace EmsMod.Core
                     }
                 }, "DutyManager.vehicle road node");
 
+                Log.Info($"SpawnVehicle: creating {vehModel}");
                 var vehicle = new Vehicle(vehModel, pos, heading) { IsPersistent = true };
                 EntitySpawnRegistry.RegisterEntity(DutyOwner, vehicle);
+                Log.Info("SpawnVehicle: created");
                 if (veh.Livery >= 0)
                 {
                     Safe.Run(() => NativeFunction.Natives.SET_VEHICLE_LIVERY(vehicle, veh.Livery), "DutyManager.vehicle livery");
                 }
                 Safe.Run(() => NativeFunction.Natives.SET_VEHICLE_ON_GROUND_PROPERLY(vehicle), "DutyManager.vehicle on ground");
+                Log.Info("SpawnVehicle: done");
             }, $"DutyManager.SpawnCurrentVehicle({vehModel})");
         }
 

@@ -12,6 +12,10 @@ namespace EmsMod.Config.Schema
     {
         public List<Hospital> Hospitals { get; set; } = new List<Hospital>();
         public List<DutyMode> Modes { get; set; } = new List<DutyMode>();
+
+        // AI partner is off by default while its spawn is being made crash-safe.
+        // Set true in Duty.xml to re-enable once fixed.
+        public bool EnablePartner { get; set; } = false;
     }
 
     public class Hospital
