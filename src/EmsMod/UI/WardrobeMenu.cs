@@ -24,20 +24,20 @@ namespace EmsMod.UI
         private static readonly string[] Labels =
         {
             "Top / Jacket", "Undershirt", "Arms / Torso", "Legs", "Shoes",
-            "Vest", "Decal / Badge", "Mask",
-            "Hat / Helmet", "Glasses"
+            "Vest", "Decal / Badge", "Mask", "Hair", "Neck / Accessory", "Bag",
+            "Hat / Helmet", "Glasses", "Earrings / Ears", "Watch", "Bracelet"
         };
         private static readonly bool[] IsProp =
         {
             false, false, false, false, false,
-            false, false, false,
-            true, true
+            false, false, false, false, false, false,
+            true, true, true, true, true
         };
         private static readonly int[] Ids =
         {
             11, 8, 3, 4, 6,
-            9, 10, 1,
-            0, 1
+            9, 10, 1, 2, 7, 5,
+            0, 1, 2, 6, 7
         };
 
         private static readonly int[] Drawable = new int[Labels.Length];
