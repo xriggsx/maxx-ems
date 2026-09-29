@@ -123,6 +123,11 @@ game closes and has full stack traces.
 
 ## 8. Git conventions
 
-- Branch is **`main`** (not `master`).
+- Default branch is **`main`** (not `master`) — this is the stable, last-known-working
+  line. Don't commit in-progress or untested work directly to it.
+- **Branch per feature/fix.** Before starting any new feature or debugging session,
+  create a branch off `main` (e.g. `feature/<name>`, `fix/<name>`). Do the
+  build → test → iterate loop there. Only merge back into `main` once the user has
+  confirmed it actually works in-game.
 - **No `Co-Authored-By` trailer** in commit messages.
 - Small, focused commits — one logical change each, so history stays bisectable.

@@ -52,8 +52,9 @@ punishment for wrong answers, no fail states.
   the user reporting back or sharing screenshots/log files, regardless of which
   machine hosts the code. "Test in-game" is always a user action, never something
   Claude verifies directly.
-- **Sync method: Git** — branch is `main`; commit/push, then pull on whichever
-  machine is building.
+- **Sync method: Git** — `main` is the stable branch; feature/bugfix work happens
+  on its own branch first (see Development Workflow Reminder below), merges back
+  into `main` once confirmed working in-game.
 
 ## Tech Stack
 - **Dev PC:** Visual Studio Community 2022 (.NET desktop development workload),
@@ -161,6 +162,15 @@ to what changed. Don't skip this because a change seems small.
 Small loop: change one thing → build → reload plugin via RPH console (`~`) instead of
 full game restart when possible → run the relevant checklist items above → commit if
 it passes. Avoid stacking multiple untested features before checking any of them.
+
+**Branch per feature/fix.** Whenever starting a new feature or debugging an existing
+one, create a new branch off `main` first (e.g. `feature/diagnosis-wheel`,
+`fix/stretcher-attach`) — don't commit in-progress or untested work directly to
+`main`. Work the small loop above on that branch. Once the user has confirmed the
+feature/fix actually works in-game (not just "builds clean"), merge the branch back
+into `main` and it becomes the new stable baseline. `main` should always be the
+last-known-working state, not a work-in-progress log. Ask the user before merging if
+it's unclear whether they've finished testing.
 
 ## When Adding a New Callout Type
 Every new callout should reuse the shared base pattern already established (base
