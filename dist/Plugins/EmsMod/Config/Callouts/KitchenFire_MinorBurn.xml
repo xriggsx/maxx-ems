@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CalloutConfig>
+  <DispatchMode>Firefighter</DispatchMode>
   <DispatchText>Small fire - someone got a burn and needs help.</DispatchText>
   <DispatchVoiceLine>Dispatch to all units. A small fire nearby, someone has a burn. Please respond.</DispatchVoiceLine>
 
@@ -8,10 +9,25 @@
 
   <OnSceneText>You're on scene. Check on the patient.</OnSceneText>
   <OnSceneVoiceLine>On scene. Checking on the patient now.</OnSceneVoiceLine>
+  <OnSceneTextVariants>
+    <string>There they are. Let's see about that burn.</string>
+    <string>You made it. Time to check on them.</string>
+    <string>On scene - let's take a look at that kitchen mishap.</string>
+  </OnSceneTextVariants>
 
   <AssessmentHelpText>Press E (or X on controller) to help the patient.</AssessmentHelpText>
   <ConversationHelpText>Press E (or X on controller) to talk to the patient.</ConversationHelpText>
   <TreatingText>Cooling the burn and covering it...</TreatingText>
+  <TreatingTextVariants>
+    <string>Running cool water over the burn...</string>
+    <string>Gently cooling it down and wrapping it...</string>
+    <string>Cooling the burn and keeping it covered...</string>
+  </TreatingTextVariants>
+  <PatientThanksTextVariants>
+    <string>Thanks, that feels so much better!</string>
+    <string>Ouch, but thank you for the help!</string>
+    <string>You're a lifesaver, thanks!</string>
+  </PatientThanksTextVariants>
   <ResolutionVoiceLine>Nice work. The patient is going to be just fine.</ResolutionVoiceLine>
 
   <Injuries>

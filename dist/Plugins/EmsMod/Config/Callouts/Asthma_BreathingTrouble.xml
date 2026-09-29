@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CalloutConfig>
+  <DispatchMode>Paramedic</DispatchMode>
   <DispatchText>Someone is having trouble breathing and needs help.</DispatchText>
   <DispatchVoiceLine>Dispatch to all units. A person is having breathing trouble nearby. Please respond.</DispatchVoiceLine>
 
@@ -8,10 +9,25 @@
 
   <OnSceneText>You're on scene. Check on the patient.</OnSceneText>
   <OnSceneVoiceLine>On scene. Checking on the patient now.</OnSceneVoiceLine>
+  <OnSceneTextVariants>
+    <string>There they are. Let's see how their breathing is.</string>
+    <string>You made it. Time to check on them.</string>
+    <string>On scene - let's help them catch their breath.</string>
+  </OnSceneTextVariants>
 
   <AssessmentHelpText>Press E (or X on controller) to help the patient.</AssessmentHelpText>
   <ConversationHelpText>Press E (or X on controller) to talk to the patient.</ConversationHelpText>
   <TreatingText>Helping the patient with their breathing...</TreatingText>
+  <TreatingTextVariants>
+    <string>Helping them breathe nice and slow...</string>
+    <string>Calmly helping them catch their breath...</string>
+    <string>Getting their breathing back to normal...</string>
+  </TreatingTextVariants>
+  <PatientThanksTextVariants>
+    <string>Thanks, I can breathe so much easier now!</string>
+    <string>That helped a lot, thank you!</string>
+    <string>Feeling much better, thanks for your help!</string>
+  </PatientThanksTextVariants>
   <ResolutionVoiceLine>Nice work. The patient is breathing easier now.</ResolutionVoiceLine>
 
   <Injuries>

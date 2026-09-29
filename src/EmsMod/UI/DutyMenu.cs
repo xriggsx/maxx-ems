@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using Rage;
+using EmsMod.Callouts;
 using EmsMod.Config.Schema;
 using EmsMod.Core;
 using EmsMod.Input;
@@ -22,9 +23,10 @@ namespace EmsMod.UI
         private const int RowCharacter = 1;
         private const int RowVehicle = 2;
         private const int RowEquipment = 3;
-        private const int RowGoOnDuty = 4;
-        private const int RowOffDuty = 5;
-        private const int RowCount = 6;
+        private const int RowRequestCallout = 4;
+        private const int RowGoOnDuty = 5;
+        private const int RowOffDuty = 6;
+        private const int RowCount = 7;
 
         private static bool _initialized;
         private static bool _visible;
@@ -152,8 +154,37 @@ namespace EmsMod.UI
             switch (_row)
             {
                 case RowEquipment:
-                    // Grab the highlighted tool right now (must be on duty).
+                    // Grab the highlighted tool right now - but only if the
+                    // highlighted Mode row is actually the mode the player is
+                    // on duty as. Scrolling Mode without pressing "Go On Duty"
+                    // only changes what's shown in the menu, not what's
+                    // actually worn - grabbing against a different mode's list
+                    // would otherwise silently do nothing (wrong index, or a
+                    // list the player isn't even dressed for).
+                    if (!DutyManager.OnDuty || _mode != DutyManager.CurrentModeIndex)
+                    {
+                        Safe.Run(
+                            () => Game.DisplayNotification("~r~Select 'Go On Duty' in this mode first to use its equipment."),
+                            "DutyMenu.equipment mode mismatch");
+                        break;
+                    }
                     DutyManager.EquipItem(_equip);
+                    break;
+
+                case RowRequestCallout:
+                    if (!DutyManager.OnDuty)
+                    {
+                        Safe.Run(() => Game.DisplayNotification("~r~Go on duty first to request a callout."), "DutyMenu.request callout not on duty");
+                        break;
+                    }
+                    if (DispatchManager.RequestNow())
+                    {
+                        _visible = false; // close so the dispatch popup is visible
+                    }
+                    else
+                    {
+                        Safe.Run(() => Game.DisplayNotification("~r~A callout is already active."), "DutyMenu.request callout busy");
+                    }
                     break;
 
                 case RowGoOnDuty:
@@ -195,6 +226,12 @@ namespace EmsMod.UI
 
         private static void Draw(RageGraphics g)
         {
+            // Re-clamp every frame, not just on open - if Duty.xml is
+            // hot-reloaded (emsmod_reloadduty) while this menu stays open with
+            // a selection the new config no longer has that many entries for,
+            // this keeps every index below safe without needing to close/reopen.
+            ClampSelections();
+
             List<DutyMode> modes = DutyManager.Config.Modes;
 
             const float width = 480f;
@@ -219,8 +256,9 @@ namespace EmsMod.UI
             DrawRow(g, x, y + headerHeight + rowHeight, rowHeight, RowCharacter, $"Uniform:  < {charName} >");
             DrawRow(g, x, y + headerHeight + rowHeight * 2, rowHeight, RowVehicle, $"Vehicle:  < {vehName} >");
             DrawRow(g, x, y + headerHeight + rowHeight * 3, rowHeight, RowEquipment, $"Equipment:  < {equipName} >   (Enter=grab)");
-            DrawRow(g, x, y + headerHeight + rowHeight * 4, rowHeight, RowGoOnDuty, "Go On Duty");
-            DrawRow(g, x, y + headerHeight + rowHeight * 5, rowHeight, RowOffDuty, "Off Duty");
+            DrawRow(g, x, y + headerHeight + rowHeight * 4, rowHeight, RowRequestCallout, "Request Callout");
+            DrawRow(g, x, y + headerHeight + rowHeight * 5, rowHeight, RowGoOnDuty, "Go On Duty");
+            DrawRow(g, x, y + headerHeight + rowHeight * 6, rowHeight, RowOffDuty, "Off Duty");
 
             g.DrawText("Up/Down move   Left/Right change   Enter/A select   Backspace/B close",
                 "Arial", 13f, new PointF(x + 16f, y + height - 22f), Color.LightGray);

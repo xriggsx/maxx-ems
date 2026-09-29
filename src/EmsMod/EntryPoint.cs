@@ -4,6 +4,7 @@ using Rage;
 using EmsMod.Callouts;
 using EmsMod.Core;
 using EmsMod.Dialogue;
+using EmsMod.Input;
 using EmsMod.UI;
 using EmsMod.Utils;
 
@@ -63,12 +64,14 @@ namespace EmsMod
                 {
                     try
                     {
+                        InputManager.Update();
                         DialogueEngine.Tick();
                         DutyManager.Tick();
                         PartnerManager.Tick();
                         DutyMenu.Tick();
                         WardrobeMenu.Tick();
                         CalloutManager.Tick();
+                        DispatchManager.Tick();
                         GameFiber.Yield();
                     }
                     catch (Exception ex)

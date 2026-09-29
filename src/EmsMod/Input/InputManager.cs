@@ -30,18 +30,46 @@ namespace EmsMod.Input
             { InputAction.MenuBack, new InputBinding(Keys.Back, ControllerButtons.B) },
         };
 
+        private static readonly Dictionary<InputAction, bool> _downThisFrame = new Dictionary<InputAction, bool>();
+        private static readonly Dictionary<InputAction, bool> _downLastFrame = new Dictionary<InputAction, bool>();
+
+        /// <summary>Snapshots every binding's raw down/up state for this frame.
+        /// Must be called exactly once per frame, before any IsActionPressed
+        /// calls - this is what makes IsActionPressed a true single-press edge
+        /// check (fires once on the frame a key/button goes down) regardless of
+        /// how many places query the same action in that frame, instead of
+        /// firing every frame the key/button is held.</summary>
+        public static void Update()
+        {
+            foreach (KeyValuePair<InputAction, InputBinding> pair in _bindings)
+            {
+                InputAction action = pair.Key;
+                InputBinding binding = pair.Value;
+
+                bool keyDown = Safe.Run(() => Game.IsKeyDown(binding.Key), false, $"InputManager.Update({action}) key");
+                bool buttonDown = Safe.Run(() => Game.IsControllerButtonDown(binding.ControllerButton), false, $"InputManager.Update({action}) controller");
+
+                _downLastFrame[action] = _downThisFrame.TryGetValue(action, out bool prev) && prev;
+                _downThisFrame[action] = keyDown || buttonDown;
+            }
+        }
+
+        /// <summary>True only on the single frame an action's key/button
+        /// transitions from up to down - holding it down does not repeat-fire.
+        /// Safe to call from multiple places in the same frame for the same
+        /// action; each returns the same answer since the edge is computed once
+        /// in Update(), not per-call.</summary>
         public static bool IsActionPressed(InputAction action)
         {
-            if (!_bindings.TryGetValue(action, out InputBinding binding))
+            if (!_bindings.ContainsKey(action))
             {
                 Log.Warn($"InputManager: no binding registered for action '{action}'.");
                 return false;
             }
 
-            bool keyPressed = Safe.Run(() => Game.IsKeyDown(binding.Key), false, $"InputManager.IsActionPressed({action}) key");
-            bool buttonPressed = Safe.Run(() => Game.IsControllerButtonDown(binding.ControllerButton), false, $"InputManager.IsActionPressed({action}) controller");
-
-            return keyPressed || buttonPressed;
+            bool down = _downThisFrame.TryGetValue(action, out bool d) && d;
+            bool wasDown = _downLastFrame.TryGetValue(action, out bool w) && w;
+            return down && !wasDown;
         }
     }
 }

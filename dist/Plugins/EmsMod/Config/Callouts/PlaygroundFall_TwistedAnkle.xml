@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CalloutConfig>
+  <DispatchMode>Paramedic</DispatchMode>
   <DispatchText>Someone took a fall at the park and needs help.</DispatchText>
   <DispatchVoiceLine>Dispatch to all units. A person has fallen at the park nearby. Please respond.</DispatchVoiceLine>
 
@@ -8,10 +9,25 @@
 
   <OnSceneText>You're on scene. Check on the patient.</OnSceneText>
   <OnSceneVoiceLine>On scene. Checking on the patient now.</OnSceneVoiceLine>
+  <OnSceneTextVariants>
+    <string>There they are. Let's see what happened.</string>
+    <string>You made it to the park. Time to check on them.</string>
+    <string>On scene - let's take a look at that fall.</string>
+  </OnSceneTextVariants>
 
   <AssessmentHelpText>Press E (or X on controller) to help the patient.</AssessmentHelpText>
   <ConversationHelpText>Press E (or X on controller) to talk to the patient.</ConversationHelpText>
   <TreatingText>Checking the injury and helping the patient...</TreatingText>
+  <TreatingTextVariants>
+    <string>Taking a gentle look and helping out...</string>
+    <string>Checking them over and giving them a hand...</string>
+    <string>Making sure they're okay and helping them up...</string>
+  </TreatingTextVariants>
+  <PatientThanksTextVariants>
+    <string>Thanks for checking on me!</string>
+    <string>I feel a lot better, thank you!</string>
+    <string>You're so nice, thank you!</string>
+  </PatientThanksTextVariants>
   <ResolutionVoiceLine>Nice work. The patient is going to be just fine.</ResolutionVoiceLine>
 
   <Injuries>

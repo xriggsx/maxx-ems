@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CalloutConfig>
+  <DispatchMode>Firefighter</DispatchMode>
   <DispatchText>House fire - a resident got out but breathed in smoke. They need help.</DispatchText>
   <DispatchVoiceLine>Dispatch to all units. House fire nearby, a resident is out but has breathed smoke. Please respond.</DispatchVoiceLine>
 
@@ -8,10 +9,25 @@
 
   <OnSceneText>You're on scene. Check on the resident.</OnSceneText>
   <OnSceneVoiceLine>On scene. Checking on the resident now.</OnSceneVoiceLine>
+  <OnSceneTextVariants>
+    <string>You made it through the smoke. Let's check on them.</string>
+    <string>There they are, safe outside. Time to check on them.</string>
+    <string>On scene - let's help them breathe easier.</string>
+  </OnSceneTextVariants>
 
   <AssessmentHelpText>Press E (or X on controller) to help the resident.</AssessmentHelpText>
   <ConversationHelpText>Press E (or X on controller) to talk to the resident.</ConversationHelpText>
   <TreatingText>Giving oxygen and helping them breathe...</TreatingText>
+  <TreatingTextVariants>
+    <string>Getting them some fresh air and oxygen...</string>
+    <string>Helping clear the smoke from their lungs...</string>
+    <string>Giving them oxygen and calming them down...</string>
+  </TreatingTextVariants>
+  <PatientThanksTextVariants>
+    <string>Thanks for getting me out safe!</string>
+    <string>I can breathe so much better now, thank you!</string>
+    <string>You saved the day, thank you!</string>
+  </PatientThanksTextVariants>
   <ResolutionVoiceLine>Nice work. The resident is breathing easier now.</ResolutionVoiceLine>
 
   <Injuries>

@@ -64,6 +64,7 @@
     <Compile Include="Dialogue\SystemSpeechVoice.cs" />
     <Compile Include="Callouts\CalloutBase.cs" />
     <Compile Include="Callouts\CalloutManager.cs" />
+    <Compile Include="Callouts\DispatchManager.cs" />
     <Compile Include="Callouts\CalloutState.cs" />
     <Compile Include="Callouts\TestCallout.cs" />
     <Compile Include="Callouts\PatientCalloutBase.cs" />
@@ -83,8 +84,10 @@
     <Compile Include="Config\Schema\Injury.cs" />
     <Compile Include="Config\Schema\DutyConfig.cs" />
     <Compile Include="Config\Schema\Outfit.cs" />
+    <Compile Include="Utils\AnimHelper.cs" />
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\ModPaths.cs" />
+    <Compile Include="Utils\RoadHelper.cs" />
     <Compile Include="Utils\Safe.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

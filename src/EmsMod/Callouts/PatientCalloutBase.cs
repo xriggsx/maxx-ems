@@ -36,12 +36,41 @@ namespace EmsMod.Callouts
         private readonly Injury _injury;
         private readonly int _severity;
 
+        // One random pick per variant pool, made once at dispatch so it stays
+        // consistent for the life of this callout instance.
+        private readonly VariantText _onSceneText;
+        private readonly VariantText _treatingText;
+        private readonly VariantText _patientThanksText;
+
+        /// <summary>Bundles a variant-pool's one-time random pick with how it
+        /// resolves against an injury override and the callout-level default,
+        /// so each variant-pooled text field only needs one field + one
+        /// constructor line + one accessor instead of three.</summary>
+        private sealed class VariantText
+        {
+            private readonly string _picked;
+
+            public VariantText(System.Collections.Generic.List<string> variants)
+            {
+                _picked = (variants != null && variants.Count > 0) ? variants[Rng.Next(variants.Count)] : null;
+            }
+
+            /// <summary>An explicit per-injury override still wins - it's a
+            /// deliberate authored choice for that specific injury. Otherwise
+            /// the pool pick stands in for the callout-level default.</summary>
+            public string Resolve(string injuryValue, string configFallback) =>
+                string.IsNullOrWhiteSpace(injuryValue) ? (_picked ?? configFallback) : injuryValue;
+        }
+
         private Vector3 _scenePosition;
         private float _sceneHeading;
         private Blip _sceneBlip;
         private Ped _patient;
         private Vehicle _sceneVehicle;
 
+        private bool _hasMedicBag;
+        private bool _bagPickupStarted;
+        private float _bagPickupElapsed;
         private bool _isTreating;
         private float _treatmentElapsed;
         private bool _transported;
@@ -50,12 +79,30 @@ namespace EmsMod.Callouts
         private int _conversationIndex;
         private bool _currentLineShown;
 
-        private Vehicle _ambulance;
-        private Ped _paramedic;
-        private Vector3 _ambulanceStaging;
+        private Vehicle _transportVehicle;
+        private Blip _hospitalBlip;
+        private Hospital _destinationHospital;
+        private Rage.Object _stretcherProp;
+        private Rage.Object _medicBagProp;
         private int _transportPhase;
         private float _transportPhaseElapsed;
         private bool _phaseIssued;
+        private bool _gearSwapStarted;
+
+        // Player-driven transport phases: walk to the ambulance and get the gear,
+        // carry it to the patient, load the patient onto the stretcher, carry
+        // them back, board them into the ambulance, drive to hospital, drop off.
+        // "Request board" and "confirm boarded" are two separate phases (rather
+        // than one phase with an extra bookkeeping flag) so each phase does
+        // exactly one thing.
+        private const int TransportWalkToVehicleForGear = 0;
+        private const int TransportWalkToPatientWithGear = 1;
+        private const int TransportLoadPatientOntoStretcher = 2;
+        private const int TransportCarryToVehicle = 3;
+        private const int TransportRequestBoard = 4;
+        private const int TransportConfirmBoarded = 5;
+        private const int TransportDrivingToHospital = 6;
+        private const int TransportDroppingOff = 7;
 
         protected PatientCalloutBase()
         {
@@ -76,6 +123,10 @@ namespace EmsMod.Callouts
                 _severity = ParseSeverity(_config.Severity);
             }
 
+            _onSceneText = new VariantText(_config.OnSceneTextVariants);
+            _treatingText = new VariantText(_config.TreatingTextVariants);
+            _patientThanksText = new VariantText(_config.PatientThanksTextVariants);
+
             Log.Info($"{GetType().Name}: injury severity = {SeverityName(_severity)}.");
         }
 
@@ -85,13 +136,13 @@ namespace EmsMod.Callouts
 
         private string DispatchTextValue => Pick(_injury?.DispatchText, _config.DispatchText);
         private string DispatchVoiceValue => Pick(_injury?.DispatchVoiceLine, _config.DispatchVoiceLine);
-        private string OnSceneTextValue => Pick(_injury?.OnSceneText, _config.OnSceneText);
+        private string OnSceneTextValue => _onSceneText.Resolve(_injury?.OnSceneText, _config.OnSceneText);
         private string OnSceneVoiceValue => Pick(_injury?.OnSceneVoiceLine, _config.OnSceneVoiceLine);
-        private string TreatingTextValue => Pick(_injury?.TreatingText, _config.TreatingText);
+        private string TreatingTextValue => _treatingText.Resolve(_injury?.TreatingText, _config.TreatingText);
         private string TreatedTextValue => Pick(_injury?.TreatedText, _config.TreatedText);
         private string TransportedTextValue => Pick(_injury?.TransportedText, _config.TransportedText);
         private string ResolutionVoiceValue => Pick(_injury?.ResolutionVoiceLine, _config.ResolutionVoiceLine);
-        private string PatientThanksTextValue => Pick(_injury?.PatientThanksText, _config.PatientThanksText);
+        private string PatientThanksTextValue => _patientThanksText.Resolve(_injury?.PatientThanksText, _config.PatientThanksText);
 
         private System.Collections.Generic.List<DialogueLine> AssessmentLinesValue =>
             (_injury != null && _injury.AssessmentLines != null && _injury.AssessmentLines.Count > 0)
@@ -208,10 +259,22 @@ namespace EmsMod.Callouts
                 if (_patient != null && _patient.Exists())
                 {
                     _patient.IsInvincible = true;
+                    // IsInvincible only stops the patient dying - without the
+                    // same fire/explosion proofing the player gets, they can
+                    // still catch fire and flail/ragdoll near the burning
+                    // car/prop, which reads as violent for a kid-friendly mod.
+                    NativeFunction.Natives.SET_ENTITY_PROOFS(_patient, false, true, true, false, false, false, false, false);
                 }
 
                 EntitySpawnRegistry.RegisterCleanupAction(InstanceId, () => Safe.Run(
-                    () => NativeFunction.Natives.SET_ENTITY_PROOFS(Game.LocalPlayer.Character, false, false, false, false, false, false, false, false),
+                    () =>
+                    {
+                        NativeFunction.Natives.SET_ENTITY_PROOFS(Game.LocalPlayer.Character, false, false, false, false, false, false, false, false);
+                        if (_patient != null && _patient.Exists())
+                        {
+                            NativeFunction.Natives.SET_ENTITY_PROOFS(_patient, false, false, false, false, false, false, false, false);
+                        }
+                    },
                     $"{GetType().Name}.revert proofs"));
 
                 if (_config.BurnSceneVehicle && _sceneVehicle != null && _sceneVehicle.Exists())
@@ -275,11 +338,74 @@ namespace EmsMod.Callouts
             DialogueEngine.Speak(OnSceneVoiceValue);
             Safe.Run(() => Game.DisplaySubtitle(OnSceneTextValue, 5000), $"{GetType().Name}.OnScene subtitle");
 
+            // Send the partner over to help with the patient instead of just
+            // trailing the player. ResumeFollowing() is registered as a cleanup
+            // action so the partner is guaranteed to snap back to normal
+            // following no matter how this callout ends (resolved, abandoned,
+            // walked away).
+            if (_config.PartnerAssists && _patient != null && _patient.Exists())
+            {
+                Vector3 partnerSpot = _patient.Position - RightVector(_sceneHeading) * 1.5f;
+                PartnerManager.AssistAtScene(partnerSpot, HeadingToward(partnerSpot, _patient.Position));
+                EntitySpawnRegistry.RegisterCleanupAction(InstanceId, PartnerManager.ResumeFollowing);
+            }
+
             AdvanceToAssessment();
         }
 
         protected override bool IsAssessmentComplete()
         {
+            // Phase 0: walk to the back of the ambulance and get the medic bag
+            // before treating anyone - every patient gets this step, whether
+            // they end up needing transport or not. A short pause plays out
+            // after the tap (face the vehicle, door open, pause, bag in hand,
+            // door shut) instead of everything snapping into place on the same
+            // frame, so it reads as an action rather than a jump-cut.
+            if (!_hasMedicBag)
+            {
+                Vehicle vehicle = DutyManager.CurrentVehicle;
+                if (vehicle == null || !vehicle.Exists())
+                {
+                    // No duty vehicle (e.g. dispatched without going on duty) -
+                    // skip the bag step rather than block the callout forever.
+                    _hasMedicBag = true;
+                    return false;
+                }
+
+                if (!_bagPickupStarted)
+                {
+                    Safe.Run(() => Game.DisplayHelp(_config.MedicBagHelpText), $"{GetType().Name}.medic bag help");
+
+                    Ped player = Game.LocalPlayer.Character;
+                    if (player.Position.DistanceTo(RearOf(vehicle)) <= 3.5f && InputManager.IsActionPressed(InputAction.Interact))
+                    {
+                        Safe.Run(() => player.Heading = HeadingToward(player.Position, vehicle.Position), $"{GetType().Name}.face vehicle for bag");
+                        Safe.Run(() => NativeFunction.Natives.SET_VEHICLE_DOOR_OPEN(vehicle, 2, false, false), $"{GetType().Name}.open ambulance for bag");
+                        Safe.Run(() => Game.DisplaySubtitle(_config.MedicBagGettingText, 2000), $"{GetType().Name}.getting bag subtitle");
+                        _bagPickupStarted = true;
+                        _bagPickupElapsed = 0f;
+                    }
+
+                    return false;
+                }
+
+                if (AdvanceTimer(ref _bagPickupElapsed, _config.MedicBagPickupSeconds))
+                {
+                    _medicBagProp = TrySpawnCarriedProp(_config.MedicBagPropModel, PedBoneId.LeftHand);
+                    Safe.Run(() => NativeFunction.Natives.SET_VEHICLE_DOOR_SHUT(vehicle, 2, false), $"{GetType().Name}.shut ambulance after bag");
+                    Safe.Run(() => Game.DisplaySubtitle(_config.MedicBagGotText, 3000), $"{GetType().Name}.medic bag subtitle");
+                    _hasMedicBag = true;
+                }
+
+                return false;
+            }
+
+            // Everything past this point is face-to-face patient care - require
+            // the player to actually be standing close to the patient before a
+            // tap registers, instead of the conversation/treatment triggering
+            // from wherever the player happens to be standing.
+            bool nearPatient = Game.LocalPlayer.Character.Position.DistanceTo(_patient.Position) <= _config.PatientInteractRadius;
+
             // Phase 1: the injury conversation - one line per single tap. The
             // patient says how they're doing, the player reassures. Pure flavor,
             // no right/wrong answers.
@@ -292,9 +418,11 @@ namespace EmsMod.Callouts
                     _currentLineShown = true;
                 }
 
-                Safe.Run(() => Game.DisplayHelp(_config.ConversationHelpText), $"{GetType().Name}.conversation help");
+                Safe.Run(
+                    () => Game.DisplayHelp(nearPatient ? _config.ConversationHelpText : _config.WalkCloserHelpText),
+                    $"{GetType().Name}.conversation help");
 
-                if (InputManager.IsActionPressed(InputAction.Interact))
+                if (nearPatient && InputManager.IsActionPressed(InputAction.Interact))
                 {
                     _conversationIndex++;
                     _currentLineShown = false;
@@ -306,16 +434,25 @@ namespace EmsMod.Callouts
             // Phase 2: single-tap to help, then a short pause-safe bandage beat.
             if (!_isTreating)
             {
-                Safe.Run(() => Game.DisplayHelp(_config.AssessmentHelpText), $"{GetType().Name}.Assessment help");
+                Safe.Run(
+                    () => Game.DisplayHelp(nearPatient ? _config.AssessmentHelpText : _config.WalkCloserHelpText),
+                    $"{GetType().Name}.Assessment help");
 
-                if (InputManager.IsActionPressed(InputAction.Interact))
+                if (nearPatient && InputManager.IsActionPressed(InputAction.Interact))
                 {
+                    Ped player = Game.LocalPlayer.Character;
+                    Safe.Run(() => player.Heading = HeadingToward(player.Position, _patient.Position), $"{GetType().Name}.face patient for treatment");
+
                     _isTreating = true;
                     _treatmentElapsed = 0f;
                     Safe.Run(
                         () => Game.DisplaySubtitle(TreatingTextValue, (int)(_config.TreatmentSeconds * 1000f)),
                         $"{GetType().Name}.treating subtitle");
                     StartTreatmentAnimation();
+                    if (_config.PartnerAssists)
+                    {
+                        PartnerManager.PlayAssistAnimation(_config.TreatmentAnimDictionary, _config.TreatmentAnimName);
+                    }
                 }
 
                 return false;
@@ -325,6 +462,10 @@ namespace EmsMod.Callouts
             {
                 // Stand back up before resolving.
                 Safe.Run(() => Game.LocalPlayer.Character.Tasks.Clear(), $"{GetType().Name}.clear treatment anim");
+                if (_config.PartnerAssists)
+                {
+                    PartnerManager.ResumeFollowing();
+                }
                 return true;
             }
 
@@ -358,9 +499,9 @@ namespace EmsMod.Callouts
                     $"{GetType().Name}.patients-helped count");
             }
 
-            if (_transported && _config.ShowAmbulanceOnTransport)
+            if (_transported && _config.TransportToHospital)
             {
-                StartAmbulanceTransport();
+                StartPlayerTransport();
             }
             else
             {
@@ -373,7 +514,10 @@ namespace EmsMod.Callouts
 
         protected override bool IsResolutionComplete()
         {
-            if (_transported && _config.ShowAmbulanceOnTransport && _ambulance != null && _ambulance.Exists())
+            // _transportVehicle is only ever set once, in StartPlayerTransport,
+            // and never cleared - so "is player transport active" is fully
+            // derivable from it without a separate bool to keep in sync.
+            if (_transportVehicle != null)
             {
                 // Overall safety cap so the sequence can never hang the callout.
                 if (AdvanceTimer(ref _resolutionElapsed, _config.TransportSequenceSeconds))
@@ -381,7 +525,7 @@ namespace EmsMod.Callouts
                     return true;
                 }
 
-                return TickTransport();
+                return TickPlayerTransport();
             }
 
             // Treated on scene: just hold on the thank-you beat.
@@ -395,91 +539,237 @@ namespace EmsMod.Callouts
             _phaseIssued = false;
         }
 
-        /// <summary>Drives the transport sequence one frame at a time:
-        /// (0) ambulance drives in and stops short, (1) paramedic gets out and
-        /// walks to the patient, (2) patient loads into the back while the medic
-        /// returns to the driver seat, (3) ambulance drives off. Every phase has
-        /// a timeout so it can never hang. Returns true when clear to despawn.</summary>
-        private bool TickTransport()
+        /// <summary>Drives the player-driven transport sequence one frame at a
+        /// time: (0) walk to the back of the vehicle and swap the medic bag for
+        /// the stretcher, (1) carry it to the patient, (2) the patient starts
+        /// walking themselves to the vehicle, (3) carry/walk back to the
+        /// vehicle, (4) single tap to send them into the back seat, (5) confirm
+        /// they're actually aboard, (6) drive to the nearest hospital, (7) drop
+        /// off. Every phase with a
+        /// timeout is config-driven so it can never hang forever; the two
+        /// purely player-input phases (0, 1) rely on the overall
+        /// TransportSequenceSeconds cap instead, matching this project's "no
+        /// fail state, patient just waits" rule. Returns true when clear to
+        /// despawn.</summary>
+        private bool TickPlayerTransport()
         {
+            // Use the vehicle pinned at transport start, not whatever
+            // DutyManager.CurrentVehicle is right now - if the player swaps
+            // vehicles mid-transport (duty menu), the old one (with the patient
+            // inside) is deleted and CurrentVehicle would silently point at an
+            // empty replacement.
+            Vehicle vehicle = _transportVehicle;
+            if (vehicle == null || !vehicle.Exists())
+            {
+                // Duty vehicle vanished mid-transport (e.g. loadout swapped) -
+                // resolve gracefully rather than hang forever.
+                return true;
+            }
+
+            if (_patient == null || !_patient.Exists())
+            {
+                return true;
+            }
+
             bool firstTick = !_phaseIssued;
             _phaseIssued = true;
+            Ped player = Game.LocalPlayer.Character;
 
             switch (_transportPhase)
             {
-                case 0: // ambulance driving in, stopping short of the scene
-                    if (_ambulance.Position.DistanceTo(_ambulanceStaging) <= 8f ||
-                        _ambulance.Position.DistanceTo(_scenePosition) <= 16f ||
-                        AdvanceTimer(ref _transportPhaseElapsed, 22f))
+                case TransportWalkToVehicleForGear: // walk to the back of the ambulance and swap the bag for the stretcher
+                    Vector3 rear = RearOf(vehicle);
+                    Safe.Run(
+                        () => Game.DisplayHelp(_config.TransportGearHelpText),
+                        $"{GetType().Name}.gear help");
+
+                    if (!_gearSwapStarted)
                     {
-                        Safe.Run(() =>
+                        if (player.Position.DistanceTo(rear) <= 3.5f && InputManager.IsActionPressed(InputAction.Interact))
                         {
-                            if (_paramedic != null && _paramedic.Exists())
+                            Safe.Run(() => player.Heading = HeadingToward(player.Position, vehicle.Position), $"{GetType().Name}.face vehicle for stretcher");
+                            Safe.Run(() =>
                             {
-                                _paramedic.Tasks.LeaveVehicle(LeaveVehicleFlags.None);
-                            }
-                        }, $"{GetType().Name}.medic leave vehicle");
-                        GoToTransportPhase(1);
-                    }
-                    break;
-
-                case 1: // paramedic out, walking to the patient
-                    if (firstTick && _paramedic != null && _paramedic.Exists() && _patient != null && _patient.Exists())
-                    {
-                        Safe.Run(
-                            () => _paramedic.Tasks.FollowNavigationMeshToPosition(_patient.Position, 0f, 1.3f),
-                            $"{GetType().Name}.medic walk to patient");
+                                NativeFunction.Natives.SET_VEHICLE_DOOR_OPEN(vehicle, 2, false, false);
+                                NativeFunction.Natives.SET_VEHICLE_DOOR_OPEN(vehicle, 3, false, false);
+                            }, $"{GetType().Name}.open ambulance doors");
+                            Safe.Run(
+                                () => Game.DisplaySubtitle(_config.TransportGettingGearText, 2000),
+                                $"{GetType().Name}.getting gear subtitle");
+                            _gearSwapStarted = true;
+                            _transportPhaseElapsed = 0f;
+                        }
+                        break;
                     }
 
-                    bool medicReached = _paramedic == null || !_paramedic.Exists() || _patient == null || !_patient.Exists() ||
-                                        _paramedic.Position.DistanceTo(_patient.Position) <= 3.5f;
-                    if (medicReached || AdvanceTimer(ref _transportPhaseElapsed, 12f))
+                    if (AdvanceTimer(ref _transportPhaseElapsed, _config.TransportGearPickupSeconds))
                     {
-                        GoToTransportPhase(2);
-                    }
-                    break;
-
-                case 2: // load the patient; medic returns to the driver seat
-                    if (firstTick)
-                    {
-                        if (_patient != null && _patient.Exists())
+                        // This patient needs the hospital, not more bandaging -
+                        // the medic bag goes back in the ambulance and the
+                        // stretcher comes out in its place.
+                        if (_medicBagProp != null && _medicBagProp.Exists())
                         {
                             Safe.Run(() =>
                             {
-                                _patient.Tasks.ClearImmediately();
-                                _patient.Tasks.EnterVehicle(_ambulance, -1, 1);
-                            }, $"{GetType().Name}.patient enter ambulance");
+                                _medicBagProp.Detach();
+                                _medicBagProp.Delete();
+                            }, $"{GetType().Name}.stow medic bag");
+                            _medicBagProp = null;
                         }
+                        _stretcherProp = TrySpawnCarriedProp(_config.StretcherPropModel, PedBoneId.RightHand);
 
-                        if (_paramedic != null && _paramedic.Exists())
-                        {
-                            Safe.Run(
-                                () => _paramedic.Tasks.EnterVehicle(_ambulance, -1, -1),
-                                $"{GetType().Name}.medic re-enter");
-                        }
-                    }
-
-                    bool patientLoaded = _patient == null || !_patient.Exists() || _patient.IsInAnyVehicle(false);
-                    if (patientLoaded || AdvanceTimer(ref _transportPhaseElapsed, 14f))
-                    {
-                        GoToTransportPhase(3);
+                        Safe.Run(
+                            () => Game.DisplaySubtitle(_config.TransportGotGearText, 3000),
+                            $"{GetType().Name}.gear subtitle");
+                        GoToTransportPhase(TransportWalkToPatientWithGear);
                     }
                     break;
 
-                case 3: // ambulance drives away
-                    if (firstTick && _paramedic != null && _paramedic.Exists())
+                case TransportWalkToPatientWithGear: // carry the gear over to the patient
+                    Safe.Run(
+                        () => Game.DisplayHelp(_config.TransportCarryToPatientHelpText),
+                        $"{GetType().Name}.carry to patient help");
+
+                    if (player.Position.DistanceTo(_patient.Position) <= 3.5f && InputManager.IsActionPressed(InputAction.Interact))
                     {
+                        Safe.Run(() => player.Heading = HeadingToward(player.Position, _patient.Position), $"{GetType().Name}.face patient for stretcher");
+                        GoToTransportPhase(TransportLoadPatientOntoStretcher);
+                    }
+                    break;
+
+                case TransportLoadPatientOntoStretcher: // patient onto the stretcher
+                    if (firstTick)
+                    {
+                        // NOTE: earlier versions rigidly attached the patient's
+                        // whole body onto the small hand-held stretcher prop and
+                        // played the lying-flat pose on them - that pinned a
+                        // full adult body at the player's hand height, which
+                        // looked broken rather than like a carried stretcher.
+                        // Keep the stretcher/bag as cosmetic hand-held props
+                        // only, and have the patient walk to the vehicle under
+                        // their own power instead - the same proven approach
+                        // the transport sequence used before the stretcher
+                        // props were added. Tasks.Clear() (not ClearImmediately)
+                        // lets the patient blend out of the lying pose into the
+                        // walk instead of snapping between the two.
                         Safe.Run(() =>
                         {
-                            Vector3 awayRaw = _scenePosition + DirNormalized(_scenePosition - Game.LocalPlayer.Character.Position) * 140f;
-                            Vector3 away = Safe.Run(() => World.GetNextPositionOnStreet(awayRaw), awayRaw, $"{GetType().Name}.transport exit point");
-                            _paramedic.Tasks.DriveToPosition(away, 18f, VehicleDrivingFlags.Normal, 5f);
-                        }, $"{GetType().Name}.ambulance drive off");
+                            _patient.Tasks.Clear();
+                            _patient.Tasks.FollowNavigationMeshToPosition(RearOf(vehicle), 0f, 1.0f);
+                        }, $"{GetType().Name}.patient walk to vehicle");
+                        Safe.Run(
+                            () => Game.DisplaySubtitle(_config.TransportPatientLoadedText, 3000),
+                            $"{GetType().Name}.loaded subtitle");
+                    }
+                    GoToTransportPhase(TransportCarryToVehicle);
+                    break;
+
+                case TransportCarryToVehicle: // carry the patient back to the vehicle
+                    Safe.Run(
+                        () => Game.DisplayHelp(_config.TransportCarryToVehicleHelpText),
+                        $"{GetType().Name}.carry to vehicle help");
+
+                    bool reachedVehicle = player.Position.DistanceTo(RearOf(vehicle)) <= 3.5f;
+                    if (reachedVehicle || AdvanceTimer(ref _transportPhaseElapsed, _config.TransportCarryToVehicleTimeoutSeconds))
+                    {
+                        GoToTransportPhase(TransportRequestBoard);
+                    }
+                    break;
+
+                case TransportRequestBoard: // single tap to send the patient into the back seat
+                    Safe.Run(
+                        () => Game.DisplayHelp(_config.TransportLoadIntoVehicleHelpText),
+                        $"{GetType().Name}.load into vehicle help");
+
+                    // Require the player to actually be at the vehicle - the
+                    // patient usually catches up during TransportCarryToVehicle,
+                    // but this stops the tap firing well before either of them
+                    // has actually arrived.
+                    if (player.Position.DistanceTo(RearOf(vehicle)) <= 3.5f && InputManager.IsActionPressed(InputAction.Interact))
+                    {
+                        Safe.Run(() => player.Heading = HeadingToward(player.Position, vehicle.Position), $"{GetType().Name}.face vehicle for boarding");
+                        StowGear();
+                        Safe.Run(() =>
+                        {
+                            _patient.Tasks.Clear();
+                            _patient.Tasks.EnterVehicle(vehicle, -1, 1);
+                        }, $"{GetType().Name}.patient enter duty vehicle");
+                        GoToTransportPhase(TransportConfirmBoarded);
+                    }
+                    break;
+
+                case TransportConfirmBoarded: // wait until the patient is actually aboard
+                    if (_patient.IsInAnyVehicle(false))
+                    {
+                        // Confirmed aboard - only now is it safe to move on to
+                        // the drive; advancing without this would let the
+                        // sequence "arrive" with no patient in the car.
+                        Safe.Run(() =>
+                        {
+                            NativeFunction.Natives.SET_VEHICLE_DOOR_SHUT(vehicle, 2, false);
+                            NativeFunction.Natives.SET_VEHICLE_DOOR_SHUT(vehicle, 3, false);
+                        }, $"{GetType().Name}.shut ambulance doors");
+                        GoToTransportPhase(TransportDrivingToHospital);
+                    }
+                    else if (AdvanceTimer(ref _transportPhaseElapsed, _config.TransportBoardVehicleTimeoutSeconds))
+                    {
+                        // Couldn't path into the vehicle in time (blocked route,
+                        // awkward parking spot) - resolve now instead of
+                        // silently pretending the drive happened.
+                        PlayPatientThanks();
+                        return true;
+                    }
+                    break;
+
+                case TransportDrivingToHospital: // player drives to the nearest hospital
+                    if (firstTick)
+                    {
+                        _destinationHospital = DutyManager.NearestHospital(_scenePosition);
+                        if (_destinationHospital != null)
+                        {
+                            Vector3 hospitalPos = new Vector3(_destinationHospital.X, _destinationHospital.Y, _destinationHospital.Z);
+                            _hospitalBlip = CreateBlip(hospitalPos, Color.DodgerBlue, "Hospital");
+                            if (_hospitalBlip != null)
+                            {
+                                Safe.Run(() => _hospitalBlip.IsRouteEnabled = true, $"{GetType().Name}.hospital blip route");
+                            }
+                        }
+                        Safe.Run(
+                            () => Game.DisplaySubtitle(_config.TransportDriveSubtitle, 5000),
+                            $"{GetType().Name}.drive to hospital subtitle");
                     }
 
-                    if (_ambulance.Position.DistanceTo(_scenePosition) >= 80f ||
-                        AdvanceTimer(ref _transportPhaseElapsed, 14f))
+                    Safe.Run(
+                        () => Game.DisplayHelp(_config.TransportDriveHelpText),
+                        $"{GetType().Name}.drive help");
+
+                    bool patientStillAboard = _patient != null && _patient.Exists() && _patient.IsInAnyVehicle(false);
+                    bool atHospital = _destinationHospital != null &&
+                        vehicle.Position.DistanceTo(new Vector3(_destinationHospital.X, _destinationHospital.Y, _destinationHospital.Z)) <= 15f;
+                    if (!patientStillAboard || atHospital || _destinationHospital == null)
                     {
+                        GoToTransportPhase(TransportDroppingOff);
+                    }
+                    break;
+
+                case TransportDroppingOff: // patient gets out at the hospital
+                    if (firstTick)
+                    {
+                        if (_hospitalBlip != null && _hospitalBlip.IsValid())
+                        {
+                            _hospitalBlip.Delete();
+                            _hospitalBlip = null;
+                        }
+                        if (_patient != null && _patient.Exists())
+                        {
+                            Safe.Run(() => _patient.Tasks.LeaveVehicle(LeaveVehicleFlags.None), $"{GetType().Name}.patient leave at hospital");
+                        }
+                    }
+
+                    bool dropped = _patient == null || !_patient.Exists() || !_patient.IsInAnyVehicle(false);
+                    if (dropped || AdvanceTimer(ref _transportPhaseElapsed, _config.TransportDropOffTimeoutSeconds))
+                    {
+                        PlayPatientThanks();
                         return true;
                     }
                     break;
@@ -490,29 +780,49 @@ namespace EmsMod.Callouts
 
         protected override void OnTick()
         {
+            // Safety net: if the patient becomes invalid while the partner is
+            // off assisting at the scene (e.g. despawned mid-assessment), make
+            // sure the partner isn't left frozen in "assisting" mode forever -
+            // it's a no-op if the partner isn't currently assisting.
+            if (_config.PartnerAssists && (_patient == null || !_patient.Exists()))
+            {
+                PartnerManager.ResumeFollowing();
+            }
+
             if (!_config.ShowSceneMarker)
             {
                 return;
             }
 
-            // Show the ground marker while heading to the scene and until the
-            // patient has been treated (i.e. up to and including Assessment).
-            if (State != CalloutState.EnRoute && State != CalloutState.OnScene && State != CalloutState.Assessment)
+            // Ground marker while heading to the scene and through treatment.
+            if (State == CalloutState.EnRoute || State == CalloutState.OnScene || State == CalloutState.Assessment)
             {
+                DrawGroundMarker(_scenePosition);
                 return;
             }
 
+            // The "walk to the back of the vehicle for the gear" transport step
+            // is a specific spot that's easy to miss at a glance - mark it too.
+            if (State == CalloutState.Resolution && _transportPhase == TransportWalkToVehicleForGear &&
+                _transportVehicle != null && _transportVehicle.Exists())
+            {
+                DrawGroundMarker(RearOf(_transportVehicle));
+            }
+        }
+
+        private void DrawGroundMarker(Vector3 position)
+        {
             Safe.Run(() =>
                 NativeFunction.Natives.DRAW_MARKER(
                     1,
-                    _scenePosition.X, _scenePosition.Y, _scenePosition.Z - 1f,
+                    position.X, position.Y, position.Z - 1f,
                     0f, 0f, 0f,
                     0f, 0f, 0f,
                     1.5f, 1.5f, 1f,
                     255, 220, 0, 120,
                     false, false, 2, false,
                     0, 0, false),
-                $"{GetType().Name}.draw scene marker");
+                $"{GetType().Name}.draw marker");
         }
 
         private void StartPatientPose()
@@ -577,39 +887,12 @@ namespace EmsMod.Callouts
                 $"{GetType().Name}.treatment animation");
         }
 
-        /// <summary>Plays a looped animation, but ONLY after confirming the anim
-        /// dictionary exists and loads within a timeout. A missing/invalid dict
-        /// would otherwise make RPH's PlayAnimation stall waiting on a load that
-        /// never completes, so guarding it keeps a bad clip name harmless (the
-        /// ped just keeps its previous pose).</summary>
-        private bool PlayLoopedAnimSafe(Ped ped, string dictionary, string name, string context)
-        {
-            if (ped == null || !ped.Exists() ||
-                string.IsNullOrWhiteSpace(dictionary) || string.IsNullOrWhiteSpace(name))
-            {
-                return false;
-            }
-
-            return Safe.Run(() =>
-            {
-                // Use the typed generic form so RPH marshals the native's return
-                // as a real bool. The plain dynamic form could throw converting
-                // the native's numeric return to bool, which would silently skip
-                // EVERY animation (the likely cause of the pose/kneel not playing).
-                bool exists = NativeFunction.Natives.DOES_ANIM_DICT_EXIST<bool>(dictionary);
-                if (!exists)
-                {
-                    Log.Warn($"{context}: animation dictionary '{dictionary}' does not exist; skipping.");
-                    return false;
-                }
-
-                var animDict = new AnimationDictionary(dictionary);
-                animDict.LoadAndWait();
-                ped.Tasks.PlayAnimation(animDict, name, 4f, AnimationFlags.Loop);
-                Log.Info($"{context}: playing '{dictionary}' / '{name}'.");
-                return true;
-            }, false, context);
-        }
+        /// <summary>Thin wrapper kept so every call site in this file reads the
+        /// same as before - the actual logic lives in AnimHelper.PlayLoopedSafe,
+        /// shared with PartnerManager (which plays the same clips on the
+        /// partner during PlayAssistAnimation).</summary>
+        private static bool PlayLoopedAnimSafe(Ped ped, string dictionary, string name, string context) =>
+            AnimHelper.PlayLoopedSafe(ped, dictionary, name, context);
 
         private void ApplyCrashedLook(Vehicle vehicle)
         {
@@ -669,93 +952,136 @@ namespace EmsMod.Callouts
             }
         }
 
-        /// <summary>Transport outcome: an ambulance drives in with a paramedic,
-        /// the patient walks over and loads up, then it drives away. Best-effort
-        /// AI sequence - if the ambulance fails to spawn we fall back to the
-        /// on-scene thank-you so the callout still resolves cleanly.</summary>
-        private void StartAmbulanceTransport()
+        /// <summary>Transport outcome: the player walks back to their own duty
+        /// vehicle and swaps the medic bag (already carried since the
+        /// assessment step) for the stretcher (a cosmetic hand prop), walks it
+        /// to the patient, then the patient walks themselves back to the
+        /// vehicle and boards before the player drives to the nearest
+        /// hospital. Falls back to the on-scene thank-you if the player has no
+        /// duty vehicle right now, so the callout still resolves cleanly.</summary>
+        private void StartPlayerTransport()
         {
-            Ped player = Game.LocalPlayer.Character;
-
-            // Spawn the ambulance back down the road (away from the player's side)
-            // so it visibly drives in to the scene.
-            Vector3 awayDir = DirNormalized(_scenePosition - player.Position);
-            Vector3 rawSpawn = _scenePosition + awayDir * 45f;
-            Vector3 spawnPoint = Safe.Run(
-                () => World.GetNextPositionOnStreet(rawSpawn),
-                rawSpawn,
-                $"{GetType().Name}.ambulance spawn point");
-
-            float ambulanceHeading = HeadingToward(spawnPoint, _scenePosition);
-            _ambulance = SpawnVehicle(_config.AmbulanceModel, spawnPoint, ambulanceHeading);
-
-            if (_ambulance == null)
+            Vehicle vehicle = DutyManager.CurrentVehicle;
+            if (vehicle == null || !vehicle.Exists())
             {
-                // No ambulance - still give a satisfying resolution.
+                // Most common cause: this callout was dispatched via a debug
+                // command without going on duty first (DutyManager.OnDuty is
+                // what spawns the duty vehicle) - make that visible instead of
+                // silently skipping straight to the thank-you, which made the
+                // whole stretcher sequence look like it didn't exist.
+                Log.Warn($"{GetType().Name}: no duty vehicle available, skipping player transport (go on duty first via F4/emsmod_duty).");
+                Safe.Run(
+                    () => Game.DisplayNotification("~r~No duty vehicle - go on duty (F4) first to transport patients."),
+                    $"{GetType().Name}.no duty vehicle notify");
                 PlayPatientThanks();
                 return;
             }
 
-            Safe.Run(() => _ambulance.IsSirenOn = true, $"{GetType().Name}.ambulance siren");
+            _transportVehicle = vehicle;
 
-            // Stop a bit short of the scene so the ambulance never drives into
-            // the patient/player huddle.
-            Vector3 towardScene = DirNormalized(_scenePosition - spawnPoint);
-            _ambulanceStaging = _scenePosition - towardScene * 10f;
+            // Lock the duty vehicle so it can't be swapped/deleted out from
+            // under the patient once they're riding in it. Unlocked via the
+            // registry's cleanup no matter how this callout ends.
+            DutyManager.VehicleSwapLocked = true;
+            EntitySpawnRegistry.RegisterCleanupAction(InstanceId, () => DutyManager.VehicleSwapLocked = false);
 
-            if (!string.IsNullOrWhiteSpace(_config.ParamedicModel))
+            GoToTransportPhase(TransportWalkToVehicleForGear);
+        }
+
+        /// <summary>Point just behind the vehicle, used as the "back doors"
+        /// interaction spot for getting/stowing the gear.</summary>
+        /// <summary>The real rear-door interaction spot for this specific
+        /// vehicle model, not a guessed fixed distance. An ambulance/fire
+        /// truck's actual rear bumper can be much farther from the vehicle's
+        /// center than a fixed offset assumes, which put the old "walk here to
+        /// open the back" spot inside the vehicle's own body for longer
+        /// models - the likely cause of "can't get the door/stretcher tap to
+        /// register." GetDimensions returns the model's real rearBottomLeft
+        /// corner in local space (Y is negative = behind center), so this
+        /// scales correctly per vehicle instead of one guess for every model.</summary>
+        private static Vector3 RearOf(Vehicle vehicle)
+        {
+            return Safe.Run(() =>
             {
-                _paramedic = SpawnPed(_config.ParamedicModel, spawnPoint + new Vector3(2f, 0f, 0f));
-                if (_paramedic != null)
-                {
-                    Safe.Run(() =>
-                    {
-                        _paramedic.WarpIntoVehicle(_ambulance, -1);
-                        // Normal (not Emergency) driving obeys traffic and stops
-                        // for peds, so it doesn't plough through the scene.
-                        _paramedic.Tasks.DriveToPosition(_ambulanceStaging, 15f, VehicleDrivingFlags.Normal, 4f);
-                    }, $"{GetType().Name}.paramedic drive-in");
-                }
+                Vector3 rearBottomLeft, frontTopRight;
+                vehicle.Model.GetDimensions(out rearBottomLeft, out frontTopRight);
+                // A bit further back than the bumper itself so the player
+                // stands clear of the vehicle, not clipped into it.
+                float rearOffset = rearBottomLeft.Y - 0.75f;
+                return vehicle.GetOffsetPosition(new Vector3(0f, rearOffset, 0f));
+            }, vehicle.Position - vehicle.ForwardVector * 2.5f, "PatientCalloutBase.RearOf");
+        }
+
+        /// <summary>Spawns a prop and attaches it to the player's hand so it
+        /// visibly rides along while carried. Best-effort: an empty/invalid
+        /// model name (e.g. overridden blank in the callout XML) just skips the
+        /// visual - the rest of the transport sequence doesn't depend on it.</summary>
+        private Rage.Object TrySpawnCarriedProp(string modelName, PedBoneId hand)
+        {
+            if (string.IsNullOrWhiteSpace(modelName))
+            {
+                return null;
             }
 
-            // The paramedic then gets out, loads the patient, and drives off -
-            // handled phase by phase in TickTransport once the ambulance arrives.
-            _transportPhase = 0;
-            _transportPhaseElapsed = 0f;
-            _phaseIssued = false;
+            return Safe.Run(() =>
+            {
+                var model = new Model(modelName);
+                if (!model.IsValid)
+                {
+                    Log.Warn($"{GetType().Name}: prop model '{modelName}' is invalid; carrying without it.");
+                    Game.DisplayNotification($"~r~Prop '{modelName}' is invalid - carrying without it.");
+                    return null;
+                }
+
+                model.LoadAndWait();
+                Ped player = Game.LocalPlayer.Character;
+                var prop = new Rage.Object(model, player.Position);
+                model.Dismiss();
+
+                if (prop == null || !prop.Exists())
+                {
+                    return null;
+                }
+
+                prop.IsPersistent = true;
+                EntitySpawnRegistry.RegisterEntity(InstanceId, prop);
+                int boneIndex = player.GetBoneIndex(hand);
+                prop.AttachTo(player, boneIndex, Vector3.Zero, new Rotator());
+                return prop;
+            }, null, $"{GetType().Name}.TrySpawnCarriedProp({modelName})");
+        }
+
+        /// <summary>Detaches the patient from the stretcher and clears both
+        /// carried props once the patient is loaded into the vehicle. The props
+        /// stay registered for cleanup either way, so a failure here can never
+        /// leave them behind.</summary>
+        private void StowGear()
+        {
+            Safe.Run(() =>
+            {
+                if (_patient != null && _patient.Exists())
+                {
+                    _patient.Detach();
+                }
+                if (_stretcherProp != null && _stretcherProp.Exists())
+                {
+                    _stretcherProp.Detach();
+                    _stretcherProp.Delete();
+                }
+                if (_medicBagProp != null && _medicBagProp.Exists())
+                {
+                    _medicBagProp.Detach();
+                    _medicBagProp.Delete();
+                }
+            }, $"{GetType().Name}.StowGear");
         }
 
         /// <summary>Sets _scenePosition and _sceneHeading to a proper drivable
         /// road node near <paramref name="near"/> (with the road's heading) so
-        /// scenes land on a reachable road, aligned to it. Falls back to the
-        /// street-position helper, then to the raw point.</summary>
+        /// scenes land on a reachable road, aligned to it.</summary>
         private void ResolveSceneRoad(Vector3 near)
         {
-            bool found = false;
-
-            Safe.Run(() =>
-            {
-                Vector3 pos;
-                float heading;
-                found = NativeFunction.Natives.GET_CLOSEST_VEHICLE_NODE_WITH_HEADING<bool>(
-                    near.X, near.Y, near.Z, out pos, out heading, 1, 3.0f, 0);
-                if (found)
-                {
-                    _scenePosition = pos;
-                    _sceneHeading = heading;
-                }
-            }, $"{GetType().Name}.closest vehicle node w/ heading");
-
-            if (found)
-            {
-                return;
-            }
-
-            _scenePosition = Safe.Run(
-                () => World.GetNextPositionOnStreet(near),
-                near,
-                $"{GetType().Name}.next position on street");
-            _sceneHeading = 0f;
+            RoadHelper.ResolveNearestRoad(near, GetType().Name, out _scenePosition, out _sceneHeading);
         }
 
         /// <summary>A random scene distance (meters) for this dispatch, so
@@ -778,17 +1104,6 @@ namespace EmsMod.Callouts
         {
             double rad = headingDegrees * Math.PI / 180.0;
             return new Vector3((float)Math.Cos(rad), (float)Math.Sin(rad), 0f);
-        }
-
-        private static Vector3 DirNormalized(Vector3 v)
-        {
-            float length = v.Length();
-            if (length <= 0.001f)
-            {
-                return new Vector3(0f, 1f, 0f);
-            }
-
-            return new Vector3(v.X / length, v.Y / length, v.Z / length);
         }
 
         /// <summary>GTA heading (degrees) that points from <paramref name="from"/>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CalloutConfig>
+  <DispatchMode>Paramedic</DispatchMode>
   <DispatchText>Car accident nearby. Someone has a small cut and needs a bandage.</DispatchText>
   <DispatchVoiceLine>Dispatch to all units. Minor car accident nearby. A person has a small cut and needs help. Please respond.</DispatchVoiceLine>
 
@@ -8,9 +9,19 @@
 
   <OnSceneText>You're on scene. Check on the patient.</OnSceneText>
   <OnSceneVoiceLine>On scene. Checking on the patient now.</OnSceneVoiceLine>
+  <OnSceneTextVariants>
+    <string>You made it! Let's go check on them.</string>
+    <string>Right on scene. Time to see how they're doing.</string>
+    <string>You're here. Let's take a look at the patient.</string>
+  </OnSceneTextVariants>
 
   <AssessmentHelpText>Press E (or X on controller) to help the patient.</AssessmentHelpText>
   <TreatingText>Putting on a bandage...</TreatingText>
+  <TreatingTextVariants>
+    <string>Cleaning the cut and wrapping it up...</string>
+    <string>Wrapping on a fresh bandage...</string>
+    <string>Taking good care of that injury...</string>
+  </TreatingTextVariants>
 
   <TreatedText>All better! The patient is treated and feeling good.</TreatedText>
   <TransportedText>The patient is taken to the hospital for a checkup. Great job!</TransportedText>
@@ -53,8 +64,6 @@
   </Injuries>
 
   <Severity>Random</Severity>
-  <TransportPercentage>40</TransportPercentage>
-  <SceneSpawnDistance>60</SceneSpawnDistance>
   <ArrivalRadius>12</ArrivalRadius>
   <TreatmentSeconds>4</TreatmentSeconds>
   <SceneVehicleModel>asea</SceneVehicleModel>
@@ -65,6 +74,11 @@
   <TreatmentAnimName>base</TreatmentAnimName>
   <PatientThanksScenario>WORLD_HUMAN_CHEERING</PatientThanksScenario>
   <PatientThanksText>Thank you so much!</PatientThanksText>
+  <PatientThanksTextVariants>
+    <string>You're the best, thank you!</string>
+    <string>Thanks for helping me out!</string>
+    <string>I feel so much better now, thank you!</string>
+  </PatientThanksTextVariants>
   <ResolutionHoldSeconds>5</ResolutionHoldSeconds>
   <DamageSceneVehicle>true</DamageSceneVehicle>
 
@@ -98,8 +112,6 @@
   <SuccessSoundSet>HUD_MINI_GAME_SOUNDSET</SuccessSoundSet>
   <ShowPatientsHelpedCount>true</ShowPatientsHelpedCount>
 
-  <ShowAmbulanceOnTransport>true</ShowAmbulanceOnTransport>
-  <AmbulanceModel>ambulance</AmbulanceModel>
-  <ParamedicModel>s_m_m_paramedic_01</ParamedicModel>
-  <TransportSequenceSeconds>40</TransportSequenceSeconds>
+  <TransportToHospital>true</TransportToHospital>
+  <TransportSequenceSeconds>300</TransportSequenceSeconds>
 </CalloutConfig>

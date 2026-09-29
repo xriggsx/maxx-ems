@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <CalloutConfig>
+  <DispatchMode>Firefighter</DispatchMode>
   <DispatchText>Car fire - the driver is out but needs help. Respond quickly.</DispatchText>
   <DispatchVoiceLine>Dispatch to all units. Vehicle fire nearby, the driver is out but needs help. Please respond.</DispatchVoiceLine>
 
@@ -8,10 +9,25 @@
 
   <OnSceneText>You're on scene. Check on the driver.</OnSceneText>
   <OnSceneVoiceLine>On scene. Checking on the driver now.</OnSceneVoiceLine>
+  <OnSceneTextVariants>
+    <string>You made it. Let's get the driver checked out.</string>
+    <string>There's the driver, safe from the car. Let's check on them.</string>
+    <string>On scene - let's make sure the driver is okay.</string>
+  </OnSceneTextVariants>
 
   <AssessmentHelpText>Press E (or X on controller) to help the driver.</AssessmentHelpText>
   <ConversationHelpText>Press E (or X on controller) to talk to the driver.</ConversationHelpText>
   <TreatingText>Moving the driver to safety and checking them...</TreatingText>
+  <TreatingTextVariants>
+    <string>Getting them further from the fire and checking them...</string>
+    <string>Making sure they're safe and looking them over...</string>
+    <string>Checking them over well clear of the fire...</string>
+  </TreatingTextVariants>
+  <PatientThanksTextVariants>
+    <string>Thanks for getting me clear of that!</string>
+    <string>That was scary, thanks for the help!</string>
+    <string>I'm just glad to be safe, thank you!</string>
+  </PatientThanksTextVariants>
   <ResolutionVoiceLine>Nice work. The driver is safe now.</ResolutionVoiceLine>
 
   <Injuries>
